@@ -32,8 +32,8 @@ Conformément aux spécifications techniques (Phase 1) :
 1. **Cloner le projet**
 
     ```bash
-    git clone https://github.com/votre-org/cemet-frontend.git
-    cd cemet-frontend
+    git clone https://github.com/abdemeh/projet-kosmio-front.git
+    cd projet-kosmio-front
     ```
 
 2. **Installer les dépendances**
