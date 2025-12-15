@@ -1,0 +1,1 @@
+// Accès simplifié au user + rôle depuis le Context

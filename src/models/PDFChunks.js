@@ -1,0 +1,1 @@
+// Chunk PDF (traçabilité IA) + page, content, embeddingId

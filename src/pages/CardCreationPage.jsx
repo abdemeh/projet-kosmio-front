@@ -1,0 +1,1 @@
+// Création fiche après génération IA

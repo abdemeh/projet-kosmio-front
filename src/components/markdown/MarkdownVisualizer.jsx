@@ -1,0 +1,1 @@
+// Affichage en lecture seule d’un markdown

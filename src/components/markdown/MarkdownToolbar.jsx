@@ -1,0 +1,1 @@
+// Actions métier (valider, publier, modifier)

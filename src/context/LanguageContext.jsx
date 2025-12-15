@@ -1,0 +1,1 @@
+//  Gestion i18n (langue globale)

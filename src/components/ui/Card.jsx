@@ -1,0 +1,1 @@
+// Carte générique pour regrouper des infos

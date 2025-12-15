@@ -1,0 +1,1 @@
+// Règles d’accès selon rôle (ADMIN, VALIDATOR)

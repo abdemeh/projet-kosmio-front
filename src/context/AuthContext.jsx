@@ -1,0 +1,1 @@
+// Authentification + rôle utilisateur + Fournit : user, role, login, logout

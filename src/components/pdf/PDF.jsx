@@ -1,0 +1,1 @@
+// Visualisation PDF + conventions d’affichage
