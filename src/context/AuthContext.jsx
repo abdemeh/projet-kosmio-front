@@ -1,6 +1,6 @@
 // Authentification + rôle utilisateur + Fournit : user, role, login, logout
 
-import { createContext, useContext, useActionState, Children } from "react";
+import { createContext, useState } from "react";
 import { fakeUsers } from "../utils/permissions";
 
 export const AuthContext = createContext();
