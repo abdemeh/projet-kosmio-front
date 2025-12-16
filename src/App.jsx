@@ -2,15 +2,25 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import { useAuth } from './hooks/useAuth'
+import { canPerformAction } from './utils/permissions'
+import { AuthProvider } from './context/AuthContext'
+import AuthDevSwitcher from './components/dev/AuthDevSwitcher'
+import ThemeDevToggleButton from './components/dev/ThemeDevToggleButton'
+import { ThemeProvider } from './context/ThemeContext'
+import ValidateDevButton from './components/dev/ValidateDevButton'
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
     <>
-      <h1 class="text-7xl font-bold text-blue-700">
-        Testing Tailwind, this should be blue!
-      </h1>
+      <AuthProvider>
+        <ThemeProvider>
+          <ValidateDevButton/>
+          <ThemeDevToggleButton></ThemeDevToggleButton>
+          <AuthDevSwitcher/>
+        </ThemeProvider>
+      </AuthProvider>
     </>
   )
 }
