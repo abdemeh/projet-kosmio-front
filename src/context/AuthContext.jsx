@@ -3,7 +3,7 @@
 import { createContext, useContext, useActionState, Children } from "react";
 import { fakeUsers } from "../utils/permissions";
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export const AuthProvider = ({children}) => {
     const [user, setUser] = useState(fakeUsers.super_admin);
@@ -30,5 +30,3 @@ export const AuthProvider = ({children}) => {
         </AuthContext.Provider>
     );
 };
-
-export const useAuth = () => useContext(AuthContext);
