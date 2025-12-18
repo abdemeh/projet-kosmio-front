@@ -1,9 +1,24 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import PDFPage from './PDFPage'; 
+import { useAuth } from '../hooks/useAuth';
+import { createSearchParams, useNavigate } from 'react-router-dom';
+import { canPerformAction } from '../utils/permissions';
 
 const EditPage = () => {
   const pdfFile = useSelector(state => state.pdf.pdfFile);
+  const {role} = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!canPerformAction(role, "update")) {
+        const params = createSearchParams({
+            action: "update",
+            url: "/edit"
+        });
+        navigate(`/error?${params.toString()}`);
+    }
+  }, [role, navigate]);
   
   // 1. Gérer la création de l'URL ici (dans le conteneur)
   const pdfUrl = useMemo(() => {

@@ -8,10 +8,10 @@ export const ROLES = {
 };
 
 export const PERMISSIONS = {
-    ADMIN: ['publish'],
-    SUPER_ADMIN: ['create', 'update', 'validate', 'publish', 'delete'],
-    EXPERT_CO2: ['validate'],
-    UTILISATEUR: ['create', 'update'],
+    ADMIN: ['update','publish'],
+    SUPER_ADMIN: ['upload', 'create', 'update', 'validate', 'publish', 'delete'],
+    EXPERT_CO2: ['update', 'validate'],
+    UTILISATEUR: ['upload','create', 'update'],
 };
 
 export const fakeUsers = { //à enlever en prod

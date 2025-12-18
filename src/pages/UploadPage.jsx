@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { createSearchParams, redirect, useNavigate } from 'react-router-dom';
 import UploadArea from '../components/pdf/UploadArea';
 import { setLoading, resetPdfState } from '../store/pdfSlice';
+import { useAuth } from '../hooks/useAuth';
+import { canPerformAction } from '../utils/permissions';
 
 const SimpleButton = ({ children, onClick, disabled, className }) => (
     <button 
@@ -20,6 +22,17 @@ const UploadPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { pdfFile, isLoading } = useSelector(state => state.pdf);
+  const { role } = useAuth();
+
+  useEffect(()=> {
+    if (!canPerformAction(role, "upload")) {
+      const params = createSearchParams({
+        action: "upload",
+        url: "/"
+      });
+      navigate(`/error?${params.toString()}`);
+    }
+  }, [role, navigate]);
 
   const handleGenerateMarkdown = () => {
     if (!pdfFile || isLoading) return;
