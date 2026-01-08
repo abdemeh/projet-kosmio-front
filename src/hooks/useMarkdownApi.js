@@ -10,7 +10,7 @@ Hook générique API markdown (solutions/secteurs)
 */
 
 export const useMarkdownApi = (type) => {
-    const baseUrl = `/api/${type}`;
+    const baseUrl = `http://127.0.0.1:8001/v1/process/${type}`;
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -29,11 +29,14 @@ export const useMarkdownApi = (type) => {
             setError(null);
 
             const formData = new FormData();
-            formData.append('file', pdfFile);
+            formData.append('pdf', pdfFile);
 
-            const response = await fetch(`${baseUrl}/generate`, {
+            const response = await fetch(`${baseUrl}`, {
                 method: "POST",
-                body2: formData,
+                headers: {
+                    "accept": "application/json",
+                },
+                body: formData,
             });
 
             return await handleResponse(response);            
