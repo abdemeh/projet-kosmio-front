@@ -5,6 +5,7 @@ import UploadArea from '../components/pdf/UploadArea';
 import { setLoading, resetPdfState } from '../store/pdfSlice';
 import { useAuth } from '../hooks/useAuth';
 import { canPerformAction } from '../utils/permissions';
+import { useMarkdownApi } from '../hooks/useMarkdownApi';
 
 const SimpleButton = ({ children, onClick, disabled, className }) => (
     <button 
@@ -21,8 +22,9 @@ const SimpleButton = ({ children, onClick, disabled, className }) => (
 const UploadPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { pdfFile, isLoading } = useSelector(state => state.pdf);
+  const { pdfFile } = useSelector(state => state.pdf);
   const { role } = useAuth();
+  const {loading: apiLoading, error, generateInfo } = useMarkdownApi('solution');
 
   useEffect(()=> {
     if (!canPerformAction(role, "upload")) {
@@ -34,14 +36,20 @@ const UploadPage = () => {
     }
   }, [role, navigate]);
 
-  const handleGenerateMarkdown = () => {
-    if (!pdfFile || isLoading) return;
+  const handleGenerateMarkdown = async () => {
+    if (!pdfFile || apiLoading) return;
     dispatch(setLoading(true));
-    console.log(`Début de la génération IA pour : ${pdfFile.name}`);
-    setTimeout(() => {
+    try {
+      console.log(`Début de la génération IA pour : ${pdfFile.name}`); 
+      const result = await generateInfo(pdfFile);
+      console.log('Résultat IA :', result);
+      navigate('/edit');
+    }catch (err) {
+      console.error("Erreur lors de la génération IA :", err);
+      alert(err.message || "Erreur lors de la génération IA");
+    }finally{
       dispatch(setLoading(false));
-      navigate('/edit'); 
-    }, 3000); 
+    }
   };
   
   const handleViewPdf = () => {
@@ -64,7 +72,7 @@ const UploadPage = () => {
           <div className="flex justify-start space-x-4 mt-4">
             <SimpleButton 
               onClick={handleViewPdf}
-              disabled={isLoading}
+              disabled={apiLoading}
               className="bg-indigo-500" 
             >
               Voir PDF / Éditer
@@ -73,16 +81,16 @@ const UploadPage = () => {
          
             <SimpleButton 
               onClick={handleGenerateMarkdown}
-              disabled={isLoading}
+              disabled={apiLoading}
               className="bg-purple-600" 
             >
-              {isLoading ? "Traitement en cours ..." : "Lancer la génération IA"}
+              {apiLoading ? "Traitement en cours ..." : "Lancer la génération IA"}
             </SimpleButton>
 
            
             <SimpleButton 
               onClick={() => dispatch(resetPdfState())}
-              disabled={isLoading}
+              disabled={apiLoading}
               className="bg-red-500" 
             >
               Annuler
@@ -92,7 +100,7 @@ const UploadPage = () => {
         </div>
       )}
 
-      {isLoading && <p className="text-center text-indigo-600 mt-4">En attente de la réponse IA...</p>}
+      {apiLoading && <p className="text-center text-indigo-600 mt-4">En attente de la réponse IA...</p>}
     </div>
   );
 };
