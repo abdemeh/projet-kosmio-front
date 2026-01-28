@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* src/index.css */
+
+/* Force l'éditeur Milkdown à prendre 100% de la hauteur de son parent */
+.milkdown-editor-container {
+    min-height: 100% !important;
+    height: 100%;
+}
+
+.milkdown .ProseMirror {
+    min-height: 100%;
+    padding-bottom: 5rem; /* Espace en bas pour scroller confortablement */
+}
