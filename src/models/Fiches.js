@@ -1,1 +1,0 @@
-// Modèle Fiche (Solution / Secteur) + id, type, status, markdown, metadata

@@ -2,10 +2,11 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { createSearchParams, redirect, useNavigate } from 'react-router-dom';
 import UploadArea from '../components/pdf/UploadArea';
-import { setLoading, resetPdfState } from '../store/pdfSlice';
+import { setLoading, resetPdfState, setGeneratedJson, setMarkdown } from '../store/pdfSlice';
 import { useAuth } from '../hooks/useAuth';
 import { canPerformAction } from '../utils/permissions';
 import { useMarkdownApi } from '../hooks/useMarkdownApi';
+import { jsonToMarkdown } from '../utils/jsonToMarkdown';
 
 const SimpleButton = ({ children, onClick, disabled, className }) => (
     <button 
@@ -41,8 +42,18 @@ const UploadPage = () => {
     dispatch(setLoading(true));
     try {
       console.log(`Début de la génération IA pour : ${pdfFile.name}`); 
-      const result = await generateInfo(pdfFile);
-      console.log('Résultat IA :', result);
+      let result = await generateInfo(pdfFile);
+
+      if (typeof result === "string") {
+        result = JSON.parse(result);
+      }
+
+      dispatch(setGeneratedJson(result));
+      dispatch(setMarkdown(jsonToMarkdown(result)));
+      console.log("🔵 result:", result);
+      console.log("🔵 typeof result:", typeof result);
+      console.log("🔵 keys:", Object.keys(result));
+      console.log("🔵 result.type:", result?.type);
       navigate('/edit');
     }catch (err) {
       console.error("Erreur lors de la génération IA :", err);

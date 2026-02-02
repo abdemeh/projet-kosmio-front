@@ -1,0 +1,122 @@
+{
+    "type": "solution",
+    "id": "sol_12345",
+    "title": "Récupération de chaleur fatale sur compresseurs d'air",
+    "metadata": {
+        "category": "Industrie / Utilités",
+        "system": "Air Comprimé",
+        "type": "Technique",
+        "maturity": "Élevé",
+        "cost_scale": "€€",
+        "complexity": "Moyenne",
+        "last_update": "2025-10-15",
+        "contributors": [
+            "ADEME",
+            "Expert CO2"
+        ]
+    },
+    "summary": "Cette solution consiste à récupérer l'énergie thermique dissipée par les compresseurs d'air pour préchauffer de l'eau sanitaire ou chauffer des locaux. Elle permet de valoriser jusqu'à 90% de l'énergie électrique consommée par le compresseur.",
+    "content": {
+        "context": {
+            "objective": "Réduire la consommation de gaz ou d'électricité pour le chauffage.",
+            "target_sites": [
+                "Industrie manufacturière",
+                "Sites agroalimentaires"
+            ],
+            "scope_includes": [
+                "Compresseurs à vis lubrifiées",
+                "Compresseurs centrifuges"
+            ],
+            "scope_excludes": [
+                "Petits compresseurs à pistons (< 10 kW)"
+            ],
+            "prerequisites": [
+                "Besoin de chaleur simultané au fonctionnement des compresseurs"
+            ]
+        },
+        "mechanism": {
+            "description": "Un échangeur thermique est installé sur le circuit d'huile du compresseur. L'huile chaude cède ses calories à un circuit d'eau secondaire avant d'être réinjectée dans le compresseur.",
+            "variants": [
+                "Récupération pour chauffage de locaux (aérothermes)",
+                "Récupération pour eau chaude sanitaire",
+                "Récupération pour préchauffage d'eau de procédé"
+            ]
+        },
+        "applicability": {
+            "conditions": [
+                "Puissance compresseur > 30 kW conseillée",
+                "Distance source/puits de chaleur < 100m pour limiter les pertes"
+            ],
+            "constraints": [
+                "Nécessite une concordance temporelle entre production d'air et besoin de chaleur"
+            ]
+        },
+        "impacts": {
+            "energy": "Récupération de 70 à 94% de la puissance électrique absorbée sous forme de chaleur.",
+            "co2": "Réduction directe des consommations d'énergie fossile (gaz/fioul) du site. Ratio typique : 0.15 à 0.2 tCO2e/MWh valorisé (si substitution gaz).",
+            "costs": {
+                "capex": "150 à 300 € / kW thermique récupéré",
+                "opex": "Faible (maintenance échangeur)",
+                "roi": "1 à 3 ans"
+            },
+            "co_benefits": [
+                "Amélioration du refroidissement des compresseurs",
+                "Durée de vie accrue de l'huile"
+            ]
+        },
+        "levers": [
+            "Optimisation de la pression de consigne",
+            "Étanchéité du réseau (réduction des fuites)"
+        ],
+        "implementation_path": [
+            {
+                "step": "Diagnostic initial",
+                "details": "Relever les puissances, les heures de fonctionnement et identifier les besoins de chaleur à proximité."
+            },
+            {
+                "step": "Dimensionnement",
+                "details": "Calculer le gisement thermique récupérable (kWh/an) et le dimensionnement de l'échangeur."
+            },
+            {
+                "step": "Installation",
+                "details": "Pose de l'échangeur, raccordement hydraulique, calorifugeage."
+            },
+            {
+                "step": "Suivi",
+                "details": "Installer un compteur d'énergie thermique pour valider les gains."
+            }
+        ],
+        "risks": [
+            {
+                "risk": "Surchauffe du compresseur en cas de défaut pompe secondaire",
+                "mitigation": "Vanne thermostatique de sécurité et by-pass automatique."
+            }
+        ],
+        "examples": [
+            {
+                "title": "Usine agroalimentaire (Bretagne)",
+                "description": "Récupération sur 2 compresseurs de 75 kW pour l'eau de nettoyage. Gain : 250 MWh/an de gaz évités.",
+                "link": "https://wikico2.org/projet/123"
+            }
+        ],
+        "resources": [
+            {
+                "title": "Fiche CEE IND-UT-102",
+                "type": "Réglementaire"
+            },
+            {
+                "title": "Guide ADEME Air Comprimé",
+                "type": "Guide technique"
+            }
+        ]
+    },
+    "traceability": {
+        "source_pdf": "Rapport_Audit_Air_Comprime_v2.pdf",
+        "extraction_confidence": 0.92,
+        "chunks_used": [
+            "chk_45",
+            "chk_46",
+            "chk_52"
+        ]
+    }
+}

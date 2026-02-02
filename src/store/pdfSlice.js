@@ -1,10 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  pdfFile: null,        // L'objet File du PDF
-  chunks: [],           // Les chunks de données après traitement (futur)
-  isLoading: false,     // Statut du traitement (Upload + Génération IA)
+  pdfFile: null,         // L'objet File du PDF
+  chunks: [],            // Les chunks de données après traitement (futur)
+  isLoading: false,      // Statut du traitement (Upload + Génération IA)
   error: null,
+  generatedJson: null,   // JSON récupéré de l'API (solution/secteur)
+  markdown: null,        // Markdown généré à partir du JSON
 };
 
 const pdfSlice = createSlice({
@@ -12,7 +14,6 @@ const pdfSlice = createSlice({
   initialState,
   reducers: {
     setPdfFile: (state, action) => {
-      // Stocke le fichier et réinitialise l'erreur
       state.pdfFile = action.payload; 
       state.error = null;
     },
@@ -20,16 +21,31 @@ const pdfSlice = createSlice({
       state.isLoading = action.payload;
     },
     resetPdfState: (state) => {
-      // Réinitialise l'état pour un nouvel upload
       Object.assign(state, initialState);
     },
-    // Action future pour l'équipe backend
     setPdfChunks: (state, action) => {
-        state.chunks = action.payload;
+      state.chunks = action.payload;
+    },
+    setGeneratedJson: (state, action) => {
+      state.generatedJson = action.payload;
+    },
+    setMarkdown: (state, action) => {
+      state.markdown = action.payload;
+    },
+    setError: (state, action) => {
+      state.error = action.payload;
     }
   },
 });
 
-export const { setPdfFile, setLoading, resetPdfState, setPdfChunks } = pdfSlice.actions;
+export const { 
+  setPdfFile, 
+  setLoading, 
+  resetPdfState, 
+  setPdfChunks, 
+  setGeneratedJson,
+  setMarkdown,
+  setError
+} = pdfSlice.actions;
 
 export default pdfSlice.reducer;

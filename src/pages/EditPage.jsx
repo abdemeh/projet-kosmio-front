@@ -6,7 +6,7 @@ import { createSearchParams, useNavigate } from 'react-router-dom';
 import { canPerformAction } from '../utils/permissions';
 
 const EditPage = () => {
-  const pdfFile = useSelector(state => state.pdf.pdfFile);
+  const {pdfFile, markdown} = useSelector(state => state.pdf);
   const {role} = useAuth();
   const navigate = useNavigate();
 
@@ -28,9 +28,7 @@ const EditPage = () => {
     return null;
   }, [pdfFile]);
   
-  if (!pdfFile) {
-    // ... (affichage d'erreur si pas de fichier)
-  }
+   if (!pdfFile) return <p>Aucun PDF sélectionné</p>;
 
  return (
     // Augmentons la largeur max du conteneur principal pour mieux voir les deux colonnes
@@ -65,9 +63,11 @@ const EditPage = () => {
         {/* Colonne 2 : Zone d'Édition Markdown (Futur composant) */}
         <div className="flex-1 min-w-0">
           <h3 className="text-xl font-semibold mb-2">Zone d'Édition Markdown</h3>
-          <div className="bg-gray-100 p-4 h-[800px] border border-dashed rounded-md flex items-center justify-center text-gray-500">
-              Contenu Markdown généré par l'IA ici...
-          </div>
+          <textarea
+            value={markdown}
+            readOnly
+            className="bg-gray-100 p-4 h-[800px] border border-dashed rounded-md w-full font-mono text-sm text-gray-800"
+          />
         </div>
 
       </div>
