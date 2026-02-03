@@ -5,6 +5,9 @@ const initialState = {
   chunks: [],           // Les chunks de données après traitement (futur)
   isLoading: false,     // Statut du traitement (Upload + Génération IA)
   error: null,
+  generatedJson: null,
+  markdown: null, 
+  type: 'solution',
 };
 
 const pdfSlice = createSlice({
@@ -26,10 +29,22 @@ const pdfSlice = createSlice({
     // Action future pour l'équipe backend
     setPdfChunks: (state, action) => {
         state.chunks = action.payload;
+    },
+    setGeneratedJson: (state, action) => {
+      state.generatedJson = action.payload;
+    },
+    setError: (state, action) => {
+      state.error = action.payload;
+    },
+    setMarkdown: (state, action) => {
+      state.markdown = action.payload;
+    },
+    setType: (state, action) => {
+      state.type = action.payload
     }
   },
 });
 
-export const { setPdfFile, setLoading, resetPdfState, setPdfChunks } = pdfSlice.actions;
+export const { setPdfFile, setLoading, resetPdfState, setPdfChunks, setGeneratedJson, setError, setMarkdown, setType} = pdfSlice.actions;
 
 export default pdfSlice.reducer;

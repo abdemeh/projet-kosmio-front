@@ -1,11 +1,13 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { createSearchParams, redirect, useNavigate } from 'react-router-dom';
+import { createSearchParams, useNavigate } from 'react-router-dom';
 import UploadArea from '../components/pdf/UploadArea';
-import { setLoading, resetPdfState } from '../store/pdfSlice';
+import { setLoading, resetPdfState, setGeneratedJson, setMarkdown, setType } from '../store/pdfSlice';
 import { useAuth } from '../hooks/useAuth';
 import { canPerformAction } from '../utils/permissions';
 import { useMarkdownApi } from '../hooks/useMarkdownApi';
+import { jsonToMarkdown } from '../utils/jsonToMarkdown';
+import FicheTypeSelector from '../components/markdown/FicheTypeSelector';
 
 const SimpleButton = ({ children, onClick, disabled, className }) => (
     <button 
@@ -22,9 +24,9 @@ const SimpleButton = ({ children, onClick, disabled, className }) => (
 const UploadPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { pdfFile } = useSelector(state => state.pdf);
+  let { pdfFile, type } = useSelector(state => state.pdf);
   const { role } = useAuth();
-  const {loading: apiLoading, error, generateInfo } = useMarkdownApi('solution');
+  const {loading: apiLoading, generateInfo } = useMarkdownApi('solution');
 
   useEffect(()=> {
     if (!canPerformAction(role, "upload")) {
@@ -41,8 +43,13 @@ const UploadPage = () => {
     dispatch(setLoading(true));
     try {
       console.log(`Début de la génération IA pour : ${pdfFile.name}`); 
-      const result = await generateInfo(pdfFile);
-      console.log('Résultat IA :', result);
+      let result = await generateInfo(pdfFile);
+      if (typeof result === "string") {
+        result = JSON.parse(result);
+      }
+      
+      dispatch(setGeneratedJson(result));
+      dispatch(setMarkdown(jsonToMarkdown(result)));
       navigate('/edit');
     }catch (err) {
       console.error("Erreur lors de la génération IA :", err);
@@ -51,6 +58,11 @@ const UploadPage = () => {
       dispatch(setLoading(false));
     }
   };
+
+  const handleType = (newType) => {
+    dispatch(setType(newType))
+    console.log(type);
+  }
   
   const handleViewPdf = () => {
       if (pdfFile) {
@@ -62,7 +74,8 @@ const UploadPage = () => {
   
     <div className="max-w-xl p-6 bg-white shadow-xl rounded-lg">
       <h1 className="text-2xl font-bold mb-6 text-gray-800">1. Téléchargement et Traitement du PDF</h1>
-      
+
+      <FicheTypeSelector currentType={type} onTypeChange={handleType}/>
       <UploadArea />
       
       {pdfFile && (

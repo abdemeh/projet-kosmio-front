@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useSelector } from "react-redux";
+
 
 /*
 Hook générique API markdown (solutions/secteurs)
@@ -9,7 +11,8 @@ Hook générique API markdown (solutions/secteurs)
     # - publish()     
 */
 
-export const useMarkdownApi = (type) => {
+export const useMarkdownApi = () => {
+    let {type} = useSelector(state => state.pdf);
     const baseUrl = `http://127.0.0.1:8001/v1/process/${type}`;
 
     const [loading, setLoading] = useState(false);
@@ -31,7 +34,7 @@ export const useMarkdownApi = (type) => {
             const formData = new FormData();
             formData.append('pdf', pdfFile);
 
-            const response = await fetch(`${baseUrl}`, {
+            const response = await fetch(baseUrl, {
                 method: "POST",
                 headers: {
                     "accept": "application/json",
@@ -39,7 +42,7 @@ export const useMarkdownApi = (type) => {
                 body: formData,
             });
 
-            return await handleResponse(response);            
+            return handleResponse(response)        ;  
         } catch (err){
             setError(err);
             throw err
