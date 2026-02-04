@@ -4,18 +4,31 @@
  * @returns {string} - Le contenu Markdown formaté.
  */
 export function jsonToMarkdown(data) {
-    if (!data || !data.type) {
-        console.error("Format JSON invalide ou type manquant");
-        return "";
+    if (!data) {
+        console.error("Aucune donnée fournie");
+        return "# Erreur\n\nAucune donnée à afficher.";
     }
 
-    switch (data.type) {
+    // Vérifier si le type est vide ou invalide
+    if (!data.type || data.type === "") {
+        console.warn("Type non spécifié, utilisation du format solution par défaut");
+        // Essayer de deviner le type basé sur la structure
+        if (data.metadata?.sub_sectors) {
+            return generateSectorMarkdown(data);
+        } else {
+            return generateSolutionMarkdown(data);
+        }
+    }
+
+    switch (data.type.toLowerCase()) {
         case "solution":
             return generateSolutionMarkdown(data);
         case "secteur":
+        case "sector":
             return generateSectorMarkdown(data);
         default:
-            return `> ⚠️ Type de fiche inconnu : ${data.type}`;
+            console.warn(`Type inconnu : ${data.type}, utilisation du format solution`);
+            return generateSolutionMarkdown(data);
     }
 }
 

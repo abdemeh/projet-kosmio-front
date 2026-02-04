@@ -5,10 +5,10 @@ import { useSelector } from "react-redux";
 /*
 Hook générique API markdown (solutions/secteurs)
     # - generateInfo()
-    # - create()
     # - update()
     # - validate()
-    # - publish()     
+    # - publish()
+    # - deleteAction()     
 */
 
 export const useMarkdownApi = () => {
@@ -43,26 +43,6 @@ export const useMarkdownApi = () => {
             });
 
             return handleResponse(response)        ;  
-        } catch (err){
-            setError(err);
-            throw err
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const create = async (markdownData) => {
-        try {
-            setLoading(true);
-            setError(null);
-
-            const response = await fetch(baseUrl, {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify(markdownData),
-            });
-            
-            return await handleResponse(response);            
         } catch (err){
             setError(err);
             throw err
@@ -145,5 +125,5 @@ export const useMarkdownApi = () => {
         }
     };
 
-    return {loading, error, generateInfo, create, update, validate, publish, deleteAction};
+    return {loading, error, generateInfo, update, validate, publish, deleteAction};
 };
