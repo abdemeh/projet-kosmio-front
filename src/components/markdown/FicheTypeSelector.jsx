@@ -1,7 +1,6 @@
 // Sélecteur Solution / Secteur
 
 import React from 'react';
-import { Factory, Lightbulb } from 'lucide-react';
 
 const FicheTypeSelector = ({ currentType, onTypeChange }) => {
     return (
@@ -14,19 +13,17 @@ const FicheTypeSelector = ({ currentType, onTypeChange }) => {
                         : 'text-gray-500 hover:text-gray-700'
                 }`}
             >
-                <Lightbulb className="w-4 h-4 mr-2" />
                 Solution
             </button>
 
             <button
-                onClick={() => onTypeChange('secteur')}
+                onClick={() => onTypeChange('sector')}
                 className={`flex items-center px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                    currentType === 'secteur'
+                    currentType === 'sector'
                         ? 'bg-white text-emerald-600 shadow-sm'
                         : 'text-gray-500 hover:text-gray-700'
                 }`}
             >
-                <Factory className="w-4 h-4 mr-2" />
                 Secteur
             </button>
         </div>
