@@ -1,6 +1,5 @@
 // Édition d’un markdown (textarea +  + preview)
 
-import React, { useEffect } from 'react';
 import { MilkdownProvider, useEditor } from '@milkdown/react';
 import { Editor, rootCtx, defaultValueCtx } from '@milkdown/core';
 import { commonmark } from '@milkdown/preset-commonmark';

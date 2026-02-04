@@ -1,14 +1,21 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import PDFPage from './PDFPage'; 
 import { useAuth } from '../hooks/useAuth';
 import { createSearchParams, useNavigate } from 'react-router-dom';
 import { canPerformAction } from '../utils/permissions';
+import MarkdownToolbar from '../components/markdown/MarkdownToolbar';
+import MarkdownEditor from '../components/markdown/MarkdownEditor';
 
 const EditPage = () => {
   const { pdfFile, markdown } = useSelector(state => state.pdf);
   const {role} = useAuth();
   const navigate = useNavigate();
+  let [isEditMod, setIsEditModEditMod] = useState(true);
+  const [status, setStatus] = useState('Brouillon');
+  const [isSaving, setIsSaving] = useState(false);
+  const [content, setContent] = useState(markdown || "");
+
 
   useEffect(() => {
     if (!canPerformAction(role, "update")) {
@@ -19,6 +26,19 @@ const EditPage = () => {
         navigate(`/error?${params.toString()}`);
     }
   }, [role, navigate]);
+
+  const handleToggleEdit = () => setIsEditModEditMod(prev => !prev);
+  const handleSave = () => {
+    setIsSaving(true);
+    setTimeout(()=> {
+        setIsSaving(false);
+        alert("Brouillon saved !");
+    }, 1000)
+  }
+  const handleValidate = () => {
+    setStatus('Validé');
+    alert("Document validé");
+  }
   
   // 1. Gérer la création de l'URL ici (dans le conteneur)
   const pdfUrl = useMemo(() => {
@@ -45,9 +65,8 @@ const EditPage = () => {
     return (
         <div className="max-w-7xl mx-auto p-8 bg-white shadow-xl rounded-lg mt-10">
             <h2 className="text-2xl font-bold mb-6 text-gray-800">
-                Aperçu du PDF : {pdfFile.name}
+                Aperçu du PDF : {pdfFile?.name || "Aucun fichier"}
             </h2>
-            
             <div className="flex space-x-8">
                 {/* Colonne PDF */}
                 <div className="flex-1 min-w-0">
@@ -70,12 +89,25 @@ const EditPage = () => {
                     <h3 className="text-xl font-semibold mb-2">
                         Markdown Généré
                     </h3>
-                    <textarea 
+                    <MarkdownToolbar 
+                        isEditing={isEditMod}
+                        onToggleEdit={handleToggleEdit}
+                        onSave={handleSave}
+                        onValidate={handleValidate}
+                        status={status}
+                        isSaving={isSaving}
+                    />
+                    { !isEditMod ? (
+                     <textarea 
                         value={markdown || "Génération du markdown en cours..."}
                         readOnly
                         className="bg-gray-100 p-4 h-[800px] border rounded-md w-full font-mono text-sm text-gray-800 resize-none"
                         placeholder="Le markdown apparaîtra ici après la génération"
-                    />
+                     />
+                    ):(
+                        <MarkdownEditor content={content} onChange={setContent}></MarkdownEditor>
+                    )}
+                    
                 </div>
             </div>
         </div>
