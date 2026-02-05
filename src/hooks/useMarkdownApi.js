@@ -20,6 +20,7 @@ export const useMarkdownApi = () => {
 
     const handleResponse = async (response) => {
         const data = await response.json();
+        console.log(data);
         if (!response.ok) {
             throw new Error(data.message || "Erreur API");
         }
@@ -36,9 +37,6 @@ export const useMarkdownApi = () => {
 
             const response = await fetch(baseUrl, {
                 method: "POST",
-                headers: {
-                    "accept": "application/json",
-                },
                 body: formData,
             });
 
