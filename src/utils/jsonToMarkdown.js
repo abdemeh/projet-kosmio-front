@@ -19,8 +19,9 @@ export function jsonToMarkdown(data) {
             return generateSolutionMarkdown(data);
         }
     }
+    console.log(data.type)
 
-    switch (data.type.toLowerCase()) {
+    switch (data.type.toString().toLowerCase()) {
         case "solution":
             return generateSolutionMarkdown(data);
         case "secteur":

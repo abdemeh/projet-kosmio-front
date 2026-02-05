@@ -6,6 +6,7 @@ import { createSearchParams, useNavigate } from 'react-router-dom';
 import { canPerformAction } from '../utils/permissions';
 import MarkdownToolbar from '../components/markdown/MarkdownToolbar';
 import MarkdownEditor from '../components/markdown/MarkdownEditor';
+import MarkdownVisualizer from '../components/markdown/MarkdownVisualizer'; 
 
 const EditPage = () => {
   const { pdfFile, markdown } = useSelector(state => state.pdf);
@@ -98,12 +99,7 @@ const EditPage = () => {
                         isSaving={isSaving}
                     />
                     { !isEditMod ? (
-                     <textarea 
-                        value={markdown || "Génération du markdown en cours..."}
-                        readOnly
-                        className="bg-gray-100 p-4 h-[800px] border rounded-md w-full font-mono text-sm text-gray-800 resize-none"
-                        placeholder="Le markdown apparaîtra ici après la génération"
-                     />
+                        <MarkdownVisualizer content={content}></MarkdownVisualizer>
                     ):(
                         <MarkdownEditor content={content} onChange={setContent}></MarkdownEditor>
                     )}
