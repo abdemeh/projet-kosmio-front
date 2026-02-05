@@ -130,20 +130,21 @@ function parseSectorMarkdown(md) {
 function splitByHeaders(md) {
     const lines = md.split('\n');
     const sections = { intro: [] };
-    let currentSection = 'intro';
+    let currentKey = 'intro';
 
     lines.forEach(line => {
-        // Détecte "## 1. Titre" ou "## 10. Titre" ou "## 🎯"
-        const match = line.match(/^##\s+(?:(\d+)\.|.*?)(.*)/);
-        if (match) {
-            currentSection = match[1] || match[2].trim().substring(0, 5); // Fallback clé
+        const headerMatch = line.match(/^##\s+(\d+)\./); 
+        if (headerMatch) {
+            currentKey = headerMatch[1];
+            sections[currentKey] = [];
+        } else if (line.startsWith('## ')) {
+             currentKey = line.replace('## ', '').trim();
+             sections[currentKey] = [];
         } else {
-            if (!sections[currentSection]) sections[currentSection] = [];
-            sections[currentSection].push(line);
+            sections[currentKey].push(line);
         }
     });
 
-    // Join lines back to strings
     Object.keys(sections).forEach(key => {
         sections[key] = sections[key].join('\n');
     });
@@ -159,7 +160,7 @@ function extractTitle(text) {
 function extractValue(text, key) {
     if (!text) return "";
     // Regex : cherche **Key** ou **Key :** suivi de n'importe quoi jusqu'à la fin de ligne
-    const regex = new RegExp(`\\*\\*${key}.*?\\*\\*[:\\s]*(.*)`, 'i');
+    const regex = new RegExp(`\\*\\*${key}\\s*[:\\*]*\\s*(.*)`, 'i');
     const match = text.match(regex);
     return match ? match[1].trim() : "";
 }
@@ -174,12 +175,12 @@ function extractListLine(text, key) {
 // Extrait les puces "- Item"
 function extractBulletPoints(text) {
     if (!text) return [];
-    const regex = /^-\s+(.*)$/gm;
+    const regex = /^[*-]\s+(.*)$/gm;    
     let match;
     const results = [];
     while ((match = regex.exec(text)) !== null) {
         // Ignore les lignes qui ressemblent à des clés "**Clé :**"
-        if (!match[1].trim().startsWith('**')) {
+        if (!match[1].includes('**:')) {
             results.push(match[1].trim());
         }
     }
@@ -211,17 +212,15 @@ function getSectionContent(sections, key) {
 
 function extractContentUnderHeader(text, subHeader) {
     if (!text) return "";
-    const regex = new RegExp(`###\\s*${subHeader}[\\s\\S]*?(?=###|$)`, 'i');
-    const match = text.match(regex);
-    if (!match) return "";
-    // Enlever le titre du match
-    return match[0].replace(new RegExp(`###\\s*${subHeader}`, 'i'), '').trim().replace(/^- /gm, '');
+    const parts = text.split(new RegExp(`###\\s*${subHeader}`, 'i'));
+    if (parts.length < 2) return "";
+    return parts[1].split('###')[0].trim().replace(/^[*-]\s+/gm, '');
 }
 
 // Parsing spécifique pour les étapes numérotées "1. **Titre** description"
 function extractNumberedSteps(text, simple = false) {
     if (!text) return [];
-    const regex = /(\d+)\.\s+\*\*(.*?)\*\*([\s\S]*?)(?=(?:\d+\.\s+\*\*)|$)/g;
+    const regex = /(\d+)\.\s+\*\*(.*?)\*\*[:\s-]*(.*)/g;    
     let match;
     const steps = [];
 
