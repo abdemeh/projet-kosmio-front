@@ -2,15 +2,93 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom Font Faces */
+@font-face {
+  font-family: 'Cy Grotesk';
+  src: url('./assets/fonts/CyGrotesk-KeyThin.otf') format('opentype');
+  font-weight: 100;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Cy Grotesk';
+  src: url('./assets/fonts/CyGrotesk-KeyLight.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Cy Grotesk';
+  src: url('./assets/fonts/CyGrotesk-KeyRegular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Cy Grotesk';
+  src: url('./assets/fonts/CyGrotesk-KeyMedium.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Cy Grotesk';
+  src: url('./assets/fonts/CyGrotesk-KeyDemi.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Cy Grotesk';
+  src: url('./assets/fonts/CyGrotesk-KeyBold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Cy Grotesk';
+  src: url('./assets/fonts/CyGrotesk-KeyDark.otf') format('opentype');
+  font-weight: 800;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Cy Grotesk';
+  src: url('./assets/fonts/CyGrotesk-KeyHeavy.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Cy Grotesk';
+  src: url('./assets/fonts/CyGrotesk-KeyBlack.otf') format('opentype');
+  font-weight: 950;
+  font-style: normal;
+}
+
+@layer base {
+  :root {
+    --primary: #FFD700;
+    /* Vibrant Yellow */
+    --primary-hover: #E6C200;
+    /* Darker Yellow on hover */
+  }
+
+  body {
+    @apply font-sans antialiased text-gray-900 bg-gray-50;
+  }
+}
+
 /* src/index.css */
 
 /* Force l'éditeur Milkdown à prendre 100% de la hauteur de son parent */
 .milkdown-editor-container {
-    min-height: 100% !important;
-    height: 100%;
+  min-height: 100% !important;
+  height: 100%;
 }
 
 .milkdown .ProseMirror {
-    min-height: 100%;
-    padding-bottom: 5rem; /* Espace en bas pour scroller confortablement */
+  min-height: 100%;
+  padding-bottom: 5rem;
+  /* Espace en bas pour scroller confortablement */
 }

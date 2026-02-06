@@ -8,16 +8,21 @@ import { canPerformAction } from '../utils/permissions';
 import { useMarkdownApi } from '../hooks/useMarkdownApi';
 import { jsonToMarkdown } from '../utils/jsonToMarkdown';
 import FicheTypeSelector from '../components/markdown/FicheTypeSelector';
+import { FileText, Eye, Wand2, Trash2, Loader2 } from 'lucide-react';
 
-const SimpleButton = ({ children, onClick, disabled, className }) => (
-    <button 
-        onClick={onClick} 
-        disabled={disabled} 
-        style={{ padding: '10px 20px', borderRadius: '6px', border: 'none', fontWeight: '500', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.7 : 1, backgroundColor: disabled ? '#ccc' : (className.includes('bg-red') ? '#EF4444' : '#4F46E5'), color: 'white', marginTop: '10px', marginLeft: '10px' }}
-        className={className}
-    >
-        {children}
-    </button>
+const SimpleButton = ({ children, onClick, disabled, className, icon: Icon }) => (
+  <button
+    onClick={onClick}
+    disabled={disabled}
+    className={`
+            flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all duration-200
+            disabled:opacity-50 disabled:cursor-not-allowed
+            ${className}
+        `}
+  >
+    {Icon && <Icon size={16} />}
+    {children}
+  </button>
 );
 
 
@@ -26,9 +31,9 @@ const UploadPage = () => {
   const navigate = useNavigate();
   let { pdfFile, type } = useSelector(state => state.pdf);
   const { role } = useAuth();
-  const {loading: apiLoading, generateInfo } = useMarkdownApi('solution');
+  const { loading: apiLoading, generateInfo } = useMarkdownApi('solution');
 
-  useEffect(()=> {
+  useEffect(() => {
     if (!canPerformAction(role, "upload")) {
       const params = createSearchParams({
         action: "upload",
@@ -42,19 +47,19 @@ const UploadPage = () => {
     if (!pdfFile || apiLoading) return;
     dispatch(setLoading(true));
     try {
-      console.log(`Début de la génération IA pour : ${pdfFile.name}`); 
+      console.log(`Début de la génération IA pour : ${pdfFile.name}`);
       let result = await generateInfo(pdfFile);
       if (typeof result === "string") {
         result = JSON.parse(result);
       }
-      
+
       dispatch(setGeneratedJson(result));
       dispatch(setMarkdown(jsonToMarkdown(result)));
       navigate('/edit');
-    }catch (err) {
+    } catch (err) {
       console.error("Erreur lors de la génération IA :", err);
       alert(err.message || "Erreur lors de la génération IA");
-    }finally{
+    } finally {
       dispatch(setLoading(false));
     }
   };
@@ -63,57 +68,79 @@ const UploadPage = () => {
     dispatch(setType(newType))
     console.log(type);
   }
-  
+
   const handleViewPdf = () => {
-      if (pdfFile) {
-          navigate('/edit');
-      }
+    if (pdfFile) {
+      navigate('/edit');
+    }
   };
-  
+
   return (
-  
-    <div className="max-w-xl p-6 bg-white shadow-xl rounded-lg">
-      <h1 className="text-2xl font-bold mb-6 text-gray-800">1. Téléchargement et Traitement du PDF</h1>
-
-      <FicheTypeSelector currentType={type} onTypeChange={handleType}/>
-      <UploadArea />
-      
-      {pdfFile && (
-        <div className="mt-6 p-4 border border-green-200 bg-green-50 rounded-md">
-          <p className="font-semibold text-green-700">Fichier sélectionné : {pdfFile.name}</p>
-          
-          <div className="flex justify-start space-x-4 mt-4">
-            <SimpleButton 
-              onClick={handleViewPdf}
-              disabled={apiLoading}
-              className="bg-indigo-500" 
-            >
-              Voir PDF / Éditer
-            </SimpleButton>
-
-         
-            <SimpleButton 
-              onClick={handleGenerateMarkdown}
-              disabled={apiLoading}
-              className="bg-purple-600" 
-            >
-              {apiLoading ? "Traitement en cours ..." : "Lancer la génération IA"}
-            </SimpleButton>
-
-           
-            <SimpleButton 
-              onClick={() => dispatch(resetPdfState())}
-              disabled={apiLoading}
-              className="bg-red-500" 
-            >
-              Annuler
-            </SimpleButton>
-
-          </div>
+    <div className="flex flex-col items-center justify-center min-h-[80vh]">
+      <div className="w-full max-w-3xl">
+        <div className="text-center mb-10">
+          <h1 className="text-4xl font-bold text-gray-900 tracking-tight mb-2">Nouveau Document</h1>
+          <p className="text-gray-500 text-lg">Importez un PDF pour extraire et structurer les données automatiquement.</p>
         </div>
-      )}
 
-      {apiLoading && <p className="text-center text-indigo-600 mt-4">En attente de la réponse IA...</p>}
+        <FicheTypeSelector currentType={type} onTypeChange={handleType} />
+
+        <div className="bg-white p-8 rounded-2xl shadow-soft border border-gray-100">
+          <UploadArea />
+
+          {pdfFile && (
+            <div className="mt-8 animate-in fade-in slide-in-from-bottom-2">
+              <div className="flex items-center gap-4 p-4 border border-gray-100 bg-gray-50 rounded-xl mb-6">
+                <div className="w-12 h-12 bg-white rounded-lg border border-gray-100 flex items-center justify-center shadow-sm">
+                  <FileText className="text-primary-dark" size={24} />
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900">{pdfFile.name}</p>
+                  <p className="text-xs text-gray-500">{(pdfFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-center gap-4">
+                <SimpleButton
+                  onClick={handleViewPdf}
+                  disabled={apiLoading}
+                  className="text-gray-900 hover:text-gray-600 hover:bg-gray-100 w-full sm:w-auto min-w-[140px] rounded-full"
+                  icon={Eye}
+                >
+                  Voir PDF
+                </SimpleButton>
+
+                <SimpleButton
+                  onClick={handleGenerateMarkdown}
+                  disabled={apiLoading}
+                  className="bg-[#FFD700] text-gray-900 font-bold hover:bg-[#E6C200] w-full sm:w-auto min-w-[200px] rounded-full transition-colors duration-200"
+                  icon={apiLoading ? Loader2 : Wand2}
+                >
+                  {apiLoading ? "Traitement en cours..." : "Génération IA"}
+                </SimpleButton>
+
+                <SimpleButton
+                  onClick={() => dispatch(resetPdfState())}
+                  disabled={apiLoading}
+                  className="text-gray-900 hover:text-red-600 hover:bg-red-50 w-full sm:w-auto rounded-full"
+                  icon={Trash2}
+                >
+                  Annuler
+                </SimpleButton>
+              </div>
+            </div>
+          )}
+
+          {apiLoading && (
+            <div className="mt-6 flex flex-col items-center justify-center text-center space-y-3">
+              <div className="w-full max-w-xs bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                <div className="h-full bg-primary animate-progress"></div>
+              </div>
+              <p className="text-sm text-gray-500 animate-pulse">Analyse du document en cours...</p>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
