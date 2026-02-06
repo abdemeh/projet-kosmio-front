@@ -1,84 +1,105 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import PDFPage from './PDFPage'; 
 import { useAuth } from '../hooks/useAuth';
 import { createSearchParams, useNavigate } from 'react-router-dom';
 import { canPerformAction } from '../utils/permissions';
 import MarkdownToolbar from '../components/markdown/MarkdownToolbar';
 import MarkdownEditor from '../components/markdown/MarkdownEditor';
-import MarkdownVisualizer from '../components/markdown/MarkdownVisualizer'; 
+import MarkdownVisualizer from '../components/markdown/MarkdownVisualizer';
+import { ArrowLeft, FileText, CheckCircle2 } from 'lucide-react';
 
 const EditPage = () => {
-  const { pdfFile, markdown } = useSelector(state => state.pdf);
-  const {role} = useAuth();
-  const navigate = useNavigate();
-  let [isEditMod, setIsEditModEditMod] = useState(true);
-  const [status, setStatus] = useState('Brouillon');
-  const [isSaving, setIsSaving] = useState(false);
-  const [content, setContent] = useState(markdown || "");
+    const { pdfFile, markdown } = useSelector(state => state.pdf);
+    const { role } = useAuth();
+    const navigate = useNavigate();
+    let [isEditMod, setIsEditMode] = useState(true);
+    const [status, setStatus] = useState('Brouillon');
+    const [isSaving, setIsSaving] = useState(false);
+    const [content, setContent] = useState(markdown || "");
 
 
-  useEffect(() => {
-    if (!canPerformAction(role, "update")) {
-        const params = createSearchParams({
-            action: "update",
-            url: "/edit"
-        });
-        navigate(`/error?${params.toString()}`);
+    useEffect(() => {
+        if (!canPerformAction(role, "update")) {
+            const params = createSearchParams({
+                action: "update",
+                url: "/edit"
+            });
+            navigate(`/error?${params.toString()}`);
+        }
+    }, [role, navigate]);
+
+    const handleToggleEdit = () => setIsEditMode(prev => !prev);
+    const handleSave = () => {
+        setIsSaving(true);
+        setTimeout(() => {
+            setIsSaving(false);
+            // alert("Brouillon saved !"); 
+        }, 1000)
     }
-  }, [role, navigate]);
-
-  const handleToggleEdit = () => setIsEditModEditMod(prev => !prev);
-  const handleSave = () => {
-    setIsSaving(true);
-    setTimeout(()=> {
-        setIsSaving(false);
-        alert("Brouillon saved !");
-    }, 1000)
-  }
-  const handleValidate = () => {
-    setStatus('Validé');
-    alert("Document validé");
-  }
-  
-  // 1. Gérer la création de l'URL ici (dans le conteneur)
-  const pdfUrl = useMemo(() => {
-    if (pdfFile) {
-      return URL.createObjectURL(pdfFile);
+    const handleValidate = () => {
+        setStatus('Validé');
+        // alert("Document validé");
     }
-    return null;
-  }, [pdfFile]);
-  
-  if (!pdfFile) {
+
+    const pdfUrl = useMemo(() => {
+        if (pdfFile) {
+            return URL.createObjectURL(pdfFile);
+        }
+        return null;
+    }, [pdfFile]);
+
+    if (!pdfFile) {
         return (
-            <div className="max-w-7xl mx-auto p-8">
-                <p className="text-gray-600">Erreur lors de la génération ou pas de PDF</p>
-                <button 
+            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+                <div className="bg-gray-50 p-8 rounded-full mb-6">
+                    <FileText size={48} className="text-gray-300" />
+                </div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">Aucun document chargé</h2>
+                <p className="text-gray-500 mb-8 max-w-sm">Veuillez sélectionner un fichier PDF pour commencer le traitement.</p>
+                <button
                     onClick={() => navigate('/upload')}
-                    className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    className="px-6 py-3 bg-primary text-gray-900 font-medium rounded-lg hover:bg-primary-light transition-colors shadow-sm hover:shadow-md"
                 >
-                    Uploader un PDF
+                    Retour à l'accueil
                 </button>
             </div>
         );
     }
 
     return (
-        <div className="max-w-7xl mx-auto p-8 bg-white shadow-xl rounded-lg mt-10">
-            <h2 className="text-2xl font-bold mb-6 text-gray-800">
-                Aperçu du PDF : {pdfFile?.name || "Aucun fichier"}
-            </h2>
-            <div className="flex space-x-8">
+        <div className="flex flex-col h-[calc(100vh-8rem)]">
+            <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => navigate('/')}
+                        className="p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors"
+                    >
+                        <ArrowLeft size={20} />
+                    </button>
+                    <div>
+                        <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                            {pdfFile?.name}
+                            <span className="px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 text-xs font-normal border border-yellow-200">
+                                {status}
+                            </span>
+                        </h2>
+                    </div>
+                </div>
+            </div>
+
+            <div className="flex flex-1 gap-6 min-h-0">
                 {/* Colonne PDF */}
-                <div className="flex-1 min-w-0">
-                    <h3 className="text-xl font-semibold mb-2">Aperçu PDF</h3>
-                    <div className="border border-gray-400 rounded-md overflow-hidden shadow-lg">
-                        <iframe 
-                            src={pdfUrl} 
-                            width="100%" 
-                            height="800px"
+                <div className="flex-1 flex flex-col min-w-0 bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden">
+                    <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+                        <h3 className="font-semibold text-gray-700 text-sm">Document Original</h3>
+                    </div>
+                    <div className="flex-1 bg-gray-100 overflow-hidden relative">
+                        <iframe
+                            src={pdfUrl}
+                            width="100%"
+                            height="100%"
                             title={`Aperçu de ${pdfFile.name}`}
-                            className="border-none"
+                            className="border-none w-full h-full"
                         >
                             Votre navigateur ne supporte pas l'affichage des PDF.
                         </iframe>
@@ -86,24 +107,27 @@ const EditPage = () => {
                 </div>
 
                 {/* Colonne Markdown */}
-                <div className="flex-1 min-w-0">
-                    <h3 className="text-xl font-semibold mb-2">
-                        Markdown Généré
-                    </h3>
-                    <MarkdownToolbar 
-                        isEditing={isEditMod}
-                        onToggleEdit={handleToggleEdit}
-                        onSave={handleSave}
-                        onValidate={handleValidate}
-                        status={status}
-                        isSaving={isSaving}
-                    />
-                    { !isEditMod ? (
-                        <MarkdownVisualizer content={content}></MarkdownVisualizer>
-                    ):(
-                        <MarkdownEditor content={content} onChange={setContent}></MarkdownEditor>
-                    )}
-                    
+                <div className="flex-1 flex flex-col min-w-0 bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden">
+                    <div className="p-2 border-b border-gray-100 bg-white z-10">
+                        <MarkdownToolbar
+                            isEditing={isEditMod}
+                            onToggleEdit={handleToggleEdit}
+                            onSave={handleSave}
+                            onValidate={handleValidate}
+                            status={status}
+                            isSaving={isSaving}
+                        />
+                    </div>
+
+                    <div className="flex-1 overflow-auto bg-white">
+                        {!isEditMod ? (
+                            <div className="p-6 prose prose-sm max-w-none">
+                                <MarkdownVisualizer content={content}></MarkdownVisualizer>
+                            </div>
+                        ) : (
+                            <MarkdownEditor content={content} onChange={setContent}></MarkdownEditor>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
