@@ -1,28 +1,35 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useAuth } from '../hooks/useAuth';
-import { createSearchParams, useNavigate } from 'react-router-dom';
+import { createSearchParams, useNavigate, useParams } from 'react-router-dom'; 
 import { canPerformAction } from '../utils/permissions';
 import MarkdownToolbar from '../components/markdown/MarkdownToolbar';
 import MarkdownEditor from '../components/markdown/MarkdownEditor';
 import MarkdownVisualizer from '../components/markdown/MarkdownVisualizer';
-import { ArrowLeft, FileText, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, FileText } from 'lucide-react';
 import { markdownToJSON} from "../utils/markdownToJson";
 import { useMarkdownApi } from '../hooks/useMarkdownApi';
 import { setMarkdown } from '../store/pdfSlice';
 
-
 const EditPage = () => {
-    const { pdfFile, markdown, id } = useSelector(state => state.pdf);
+    const { id: paramId } = useParams(); 
+    
+    const { pdfFile, markdown, id: storeId } = useSelector(state => state.pdf);
+    
+   
+    const currentId = paramId || storeId;
+
     const { role } = useAuth();
     const navigate = useNavigate();
     let [isEditMod, setIsEditMode] = useState(true);
     const [status, setStatus] = useState('Brouillon');
     const [isSaving, setIsSaving] = useState(false);
+    
+    
     const [content, setContent] = useState(markdown || "");
+    
     const {update, loading, error} = useMarkdownApi();
     const dispatch = useDispatch();
-
 
     useEffect(() => {
         if (!canPerformAction(role, "update")) {
@@ -34,18 +41,20 @@ const EditPage = () => {
         }
     }, [role, navigate]);
 
+    
     const handleToggleEdit = () => setIsEditMode(prev => !prev);
+    
     const handleSave = async () => {
-        console.log(id);
-        if (!content || !id) {
-            console.log("HAAAAAAAAAAAAAAAAA");
+        console.log(currentId);
+        if (!content || !currentId) {
+            console.log("ID ou Contenu manquant");
             return;
         };
         const markdownData = markdownToJSON(content);
 
         try {
             setIsSaving(true);
-            const result = await update(id, markdownData);
+            const result = await update(currentId, markdownData);
             console.log("Update réussi :", result);
             dispatch(setMarkdown(content))
             alert("Mise à jour réussie !");
@@ -56,6 +65,7 @@ const EditPage = () => {
             setIsSaving(false);
         }
     };
+
     const handleValidate = () => {
         setStatus('Validé');
     }
@@ -67,14 +77,15 @@ const EditPage = () => {
         return null;
     }, [pdfFile]);
 
-    if (!pdfFile) {
+    
+    if (!pdfFile && !content && !paramId) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
                 <div className="bg-gray-50 p-8 rounded-full mb-6">
                     <FileText size={48} className="text-gray-300" />
                 </div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-2">Aucun document chargé</h2>
-                <p className="text-gray-500 mb-8 max-w-sm">Veuillez sélectionner un fichier PDF pour commencer le traitement.</p>
+                <p className="text-gray-500 mb-8 max-w-sm">Veuillez sélectionner un fichier PDF ou une solution existante.</p>
                 <button
                     onClick={() => navigate('/upload')}
                     className="px-6 py-3 bg-primary text-gray-900 font-medium rounded-lg hover:bg-primary-light transition-colors shadow-sm hover:shadow-md"
@@ -97,7 +108,7 @@ const EditPage = () => {
                     </button>
                     <div>
                         <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                            {pdfFile?.name}
+                            {pdfFile?.name || "Édition Solution"}
                             <span className="px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 text-xs font-normal border border-yellow-200">
                                 {status}
                             </span>
@@ -107,21 +118,27 @@ const EditPage = () => {
             </div>
 
             <div className="flex flex-1 gap-6 min-h-0">
-                {/* Colonne PDF */}
+                {/* Colonne PDF ou Placeholder si pas de PDF */}
                 <div className="flex-1 flex flex-col min-w-0 bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden">
                     <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
                         <h3 className="font-semibold text-gray-700 text-sm">Document Original</h3>
                     </div>
-                    <div className="flex-1 bg-gray-100 overflow-hidden relative">
-                        <iframe
-                            src={pdfUrl}
-                            width="100%"
-                            height="100%"
-                            title={`Aperçu de ${pdfFile.name}`}
-                            className="border-none w-full h-full"
-                        >
-                            Votre navigateur ne supporte pas l'affichage des PDF.
-                        </iframe>
+                    <div className="flex-1 bg-gray-100 overflow-hidden relative flex items-center justify-center">
+                        {pdfUrl ? (
+                            <iframe
+                                src={pdfUrl}
+                                width="100%"
+                                height="100%"
+                                title={`Aperçu`}
+                                className="border-none w-full h-full"
+                            >
+                                Votre navigateur ne supporte pas l'affichage des PDF.
+                            </iframe>
+                        ) : (
+                            <p className="text-gray-400 text-sm p-4 text-center">
+                                Document PDF non disponible <br/> (Mode édition texte seul)
+                            </p>
+                        )}
                     </div>
                 </div>
 
