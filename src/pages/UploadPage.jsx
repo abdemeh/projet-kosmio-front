@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { createSearchParams, useNavigate } from 'react-router-dom';
 import UploadArea from '../components/pdf/UploadArea';
-import { setLoading, resetPdfState, setGeneratedJson, setMarkdown, setType } from '../store/pdfSlice';
+import { setId, setLoading, resetPdfState, setGeneratedJson, setMarkdown, setType } from '../store/pdfSlice';
 import { useAuth } from '../hooks/useAuth';
 import { canPerformAction } from '../utils/permissions';
 import { useMarkdownApi } from '../hooks/useMarkdownApi';
@@ -55,6 +55,7 @@ const UploadPage = () => {
 
       dispatch(setGeneratedJson(result));
       dispatch(setMarkdown(jsonToMarkdown(result)));
+      dispatch(setId(result.id));
       navigate('/edit');
     } catch (err) {
       console.error("Erreur lors de la génération IA :", err);

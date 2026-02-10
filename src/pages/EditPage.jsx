@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useAuth } from '../hooks/useAuth';
 import { createSearchParams, useNavigate } from 'react-router-dom';
 import { canPerformAction } from '../utils/permissions';
@@ -7,15 +7,21 @@ import MarkdownToolbar from '../components/markdown/MarkdownToolbar';
 import MarkdownEditor from '../components/markdown/MarkdownEditor';
 import MarkdownVisualizer from '../components/markdown/MarkdownVisualizer';
 import { ArrowLeft, FileText, CheckCircle2 } from 'lucide-react';
+import { markdownToJSON} from "../utils/markdownToJson";
+import { useMarkdownApi } from '../hooks/useMarkdownApi';
+import { setMarkdown } from '../store/pdfSlice';
+
 
 const EditPage = () => {
-    const { pdfFile, markdown } = useSelector(state => state.pdf);
+    const { pdfFile, markdown, id } = useSelector(state => state.pdf);
     const { role } = useAuth();
     const navigate = useNavigate();
     let [isEditMod, setIsEditMode] = useState(true);
     const [status, setStatus] = useState('Brouillon');
     const [isSaving, setIsSaving] = useState(false);
     const [content, setContent] = useState(markdown || "");
+    const {update, loading, error} = useMarkdownApi();
+    const dispatch = useDispatch();
 
 
     useEffect(() => {
@@ -29,16 +35,29 @@ const EditPage = () => {
     }, [role, navigate]);
 
     const handleToggleEdit = () => setIsEditMode(prev => !prev);
-    const handleSave = () => {
-        setIsSaving(true);
-        setTimeout(() => {
+    const handleSave = async () => {
+        console.log(id);
+        if (!content || !id) {
+            console.log("HAAAAAAAAAAAAAAAAA");
+            return;
+        };
+        const markdownData = markdownToJSON(content);
+
+        try {
+            setIsSaving(true);
+            const result = await update(id, markdownData);
+            console.log("Update réussi :", result);
+            dispatch(setMarkdown(content))
+            alert("Mise à jour réussie !");
+        } catch (err) {
+            console.error("Erreur lors de la mise à jour :", err);
+            alert(err.message || "Erreur lors de la mise à jour");
+        } finally {
             setIsSaving(false);
-            // alert("Brouillon saved !"); 
-        }, 1000)
-    }
+        }
+    };
     const handleValidate = () => {
         setStatus('Validé');
-        // alert("Document validé");
     }
 
     const pdfUrl = useMemo(() => {

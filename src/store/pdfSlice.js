@@ -8,6 +8,7 @@ const initialState = {
   generatedJson: null,
   markdown: null, 
   type: 'solution',
+  id: null,
 };
 
 const pdfSlice = createSlice({
@@ -41,10 +42,13 @@ const pdfSlice = createSlice({
     },
     setType: (state, action) => {
       state.type = action.payload
+    },
+    setId: (state, action) => {
+      state.id = action.payload
     }
   },
 });
 
-export const { setPdfFile, setLoading, resetPdfState, setPdfChunks, setGeneratedJson, setError, setMarkdown, setType} = pdfSlice.actions;
+export const { setId, setPdfFile, setLoading, resetPdfState, setPdfChunks, setGeneratedJson, setError, setMarkdown, setType} = pdfSlice.actions;
 
 export default pdfSlice.reducer;
