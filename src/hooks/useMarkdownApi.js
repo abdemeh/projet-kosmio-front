@@ -55,7 +55,7 @@ export const useMarkdownApi = () => {
             setLoading(true);
             setError(null);
 
-            const response = await fetch(`${baseUrl}/${id}`, {
+            const response = await fetch(`${url}/v1/update/${id}`, {
                 method: "PUT",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify(markdownData),
@@ -124,5 +124,35 @@ export const useMarkdownApi = () => {
         }
     };
 
-    return {loading, error, generateInfo, update, validate, publish, deleteAction};
+    const getAllSolution = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const response = await fetch(`${url}/v1/get/solution`)
+
+            return handleResponse(response);
+        }catch (err) {
+            setError(err);
+            throw err
+        }finally {
+            setLoading(false)
+        }
+    }
+
+    const getAllSector = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const response = await fetch(`${url}/v1/get/sector`)
+
+            return handleResponse(response);
+        }catch (err) {
+            setError(err);
+            throw err
+        }finally {
+            setLoading(false)
+        }
+    }
+
+    return {loading, error, getAllSector, getAllSolution, generateInfo, update, validate, publish, deleteAction};
 };
