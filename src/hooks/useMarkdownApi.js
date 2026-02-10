@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
-
+import {env} from "../config/env";
 
 /*
 Hook générique API markdown (solutions/secteurs)
@@ -13,7 +13,8 @@ Hook générique API markdown (solutions/secteurs)
 
 export const useMarkdownApi = () => {
     let {type} = useSelector(state => state.pdf);
-    const baseUrl = `http://127.0.0.1:8001/v1/process/${type}`;
+    const url = env.apiUrl;
+    const baseUrl = `${url}/v1/process/${type}`;
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
