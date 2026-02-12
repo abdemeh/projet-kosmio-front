@@ -16,11 +16,12 @@ const EditPage = () => {
     const { pdfFile, markdown, id } = useSelector(state => state.pdf);
     const { role } = useAuth();
     const navigate = useNavigate();
-    let [isEditMod, setIsEditMode] = useState(true);
+    const [isEditMod, setIsEditMode] = useState(false);
     const [status, setStatus] = useState('Brouillon');
     const [isSaving, setIsSaving] = useState(false);
     const [content, setContent] = useState(markdown || "");
     const {update, loading, error} = useMarkdownApi();
+    const [isAddImage, setIsAddImage] = useState(false);
     const dispatch = useDispatch();
 
 
@@ -34,11 +35,11 @@ const EditPage = () => {
         }
     }, [role, navigate]);
 
+    const handleToggleAddImage = () => setIsAddImage(prev => !prev)
     const handleToggleEdit = () => setIsEditMode(prev => !prev);
     const handleSave = async () => {
         console.log(id);
         if (!content || !id) {
-            console.log("HAAAAAAAAAAAAAAAAA");
             return;
         };
         const markdownData = markdownToJSON(content);
@@ -130,7 +131,9 @@ const EditPage = () => {
                     <div className="p-2 border-b border-gray-100 bg-white z-10">
                         <MarkdownToolbar
                             isEditing={isEditMod}
+                            isAddImage={isAddImage}
                             onToggleEdit={handleToggleEdit}
+                            onToggleAddImage={handleToggleAddImage}
                             onSave={handleSave}
                             onValidate={handleValidate}
                             status={status}
