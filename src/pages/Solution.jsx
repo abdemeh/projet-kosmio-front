@@ -41,7 +41,6 @@ const Solution = () => {
 
         if (window.confirm("Voulez-vous vraiment supprimer cette solution ?")) {
             console.log("Suppression de l'ID :", id);
-            setSolutions(prevSolutions => prevSolutions.filter(sol => sol.id !== id));
         }
     };
 

@@ -154,5 +154,33 @@ export const useMarkdownApi = () => {
         }
     }
 
-    return {loading, error, getAllSector, getAllSolution, generateInfo, update, validate, publish, deleteAction};
+    const getHistoryById = async (id) => {
+        try{
+            setLoading(true);
+            setError(null);
+            const response = await fetch(`${url}/v1/get/${id}/history`);
+            return handleResponse(response);
+        }catch (err) {
+            setError(err);
+            throw err
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const getFileById = async (id) => {
+        try{
+            setLoading(true);
+            setError(null);
+            const response = await fetch(`${url}/v1/get/${id}`)
+            return handleResponse(response);
+        } catch (err) {
+            setError(err);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return {loading, error, getFileById, getHistoryById, getAllSector, getAllSolution, generateInfo, update, validate, publish, deleteAction};
 };

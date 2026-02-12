@@ -21,7 +21,7 @@ const EditPage = () => {
 
     const { role } = useAuth();
     const navigate = useNavigate();
-    let [isEditMod, setIsEditMode] = useState(true);
+    const [isEditMod, setIsEditMode] = useState(false);
     const [status, setStatus] = useState('Brouillon');
     const [isSaving, setIsSaving] = useState(false);
     
@@ -29,6 +29,7 @@ const EditPage = () => {
     const [content, setContent] = useState(markdown || "");
     
     const {update, loading, error} = useMarkdownApi();
+    const [isAddImage, setIsAddImage] = useState(false);
     const dispatch = useDispatch();
 
     useEffect(() => {
@@ -41,7 +42,7 @@ const EditPage = () => {
         }
     }, [role, navigate]);
 
-    
+    const handleToggleAddImage = () => setIsAddImage(prev => !prev)
     const handleToggleEdit = () => setIsEditMode(prev => !prev);
     
     const handleSave = async () => {
@@ -147,7 +148,9 @@ const EditPage = () => {
                     <div className="p-2 border-b border-gray-100 bg-white z-10">
                         <MarkdownToolbar
                             isEditing={isEditMod}
+                            isAddImage={isAddImage}
                             onToggleEdit={handleToggleEdit}
+                            onToggleAddImage={handleToggleAddImage}
                             onSave={handleSave}
                             onValidate={handleValidate}
                             status={status}
