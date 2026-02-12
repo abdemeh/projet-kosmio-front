@@ -3,12 +3,16 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   image: null,
   isLoading: false,
+  section: 0,
 };
 
 const ficheSlice = createSlice({
   name: 'fiche',
   initialState,
   reducers: {
+    setSection: (state, action) => {
+      state.section = action.payload;
+    },
     setImage: (state, action) => {
       state.image = action.payload;
     },
@@ -22,5 +26,5 @@ const ficheSlice = createSlice({
 });
 
 
-export const { setImage, resetImageState} = ficheSlice.actions;
+export const { setImage, setSection, resetImageState} = ficheSlice.actions;
 export default ficheSlice.reducer;

@@ -1,6 +1,6 @@
 // Actions métier (valider, publier, modifier)
 import React from 'react';
-import { Save, CheckCircle, UploadCloud, Edit3, Eye, Edit2 } from 'lucide-react';
+import { Save, CheckCircle, UploadCloud, Edit3, Eye, Edit2, Paperclip } from 'lucide-react';
 import { canPerformAction } from '../../utils/permissions';
 import { useAuth } from '../../hooks/useAuth';
 import DropDownAddImage from './DropDownAddImage';
@@ -51,7 +51,7 @@ const MarkdownToolbar = ({
                     onClick={onToggleAddImage}
                     className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-white hover:bg-gray-50 hover:text-gray-900 rounded-lg border border-gray-200 transition-all"
                     >
-                    <Edit2 size={14}/> Ajouter une image
+                    <Paperclip size={14}/> Image
                     </button>
                 }
 
