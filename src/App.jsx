@@ -8,21 +8,25 @@ import MainLayout from './layouts/MainLayout';
 import Solution from './pages/Solution';
 import Sector from './pages/Sector';
 
+import { ThemeProvider } from './context/ThemeContext';
+
 function App() {
   return (
-    <AuthProvider>
-      <Routes>
-        <Route element={<MainLayout />}>
-          <Route path="/" element={<UploadPage />} />
-          <Route path="/upload" element={<UploadPage />} />
-          <Route path="/edit" element={<EditPage />} />
-          <Route path="/error" element={<ErrorPage />} />
-          {/* Placeholder routes for nav items */}
-          <Route path="/solution" element={<Solution />} />
-          <Route path="/secteur" element={<Sector />} />
-        </Route>
-      </Routes>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <Routes>
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<UploadPage />} />
+            <Route path="/upload" element={<UploadPage />} />
+            <Route path="/edit" element={<EditPage />} />
+            <Route path="/error" element={<ErrorPage />} />
+            {/* Placeholder routes for nav items */}
+            <Route path="/solution" element={<Solution />} />
+            <Route path="/secteur" element={<Sector />} />
+          </Route>
+        </Routes>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
