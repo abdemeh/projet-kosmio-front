@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useMarkdownApi } from "../hooks/useMarkdownApi";
 import { useNavigate } from "react-router-dom";
+import SimpleButton from "../components/ui/SimpleButton";
+import { Pencil, Trash2 } from "lucide-react";
 
 const Solution = () => {
 
@@ -14,12 +16,12 @@ const Solution = () => {
 
     const navigate = useNavigate();
 
-    
+
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const data = await getAllSolution();
-               
+
                 if (data) {
                     setSolutions(data);
                 }
@@ -29,7 +31,7 @@ const Solution = () => {
         };
 
         fetchData();
-    }, []);    
+    }, []);
 
     // Handler pour le bouton "Éditer"
     const handleEditClick = (id) => {
@@ -50,8 +52,8 @@ const Solution = () => {
     if (error) return <div className="text-center py-10 text-red-500"><p>Erreur : {error.message}</p></div>;
 
     return (
-        <div className="text-center py-20 text-gray-500">
-            <h2 className="text-xl font-bold mb-4">Solutions</h2>
+        <div className="flex flex-col items-center justify-center min-h-[50vh]">
+            <h1 className="text-4xl font-bold text-gray-900 tracking-tight mb-10">Solutions</h1>
             {solutions.length === 0 ? (
                 <div className="flex flex-col items-center">
                     <p className="mb-4">Aucune solution trouvée.</p>
@@ -65,19 +67,21 @@ const Solution = () => {
                         <li key={solution.id} className="p-3 border rounded hover:bg-gray-50 flex justify-between items-center bg-white shadow-sm">
                             <span className="font-medium text-gray-800">{solution.title || "Solution sans titre"}</span>
 
-                            <button
+                            <SimpleButton
                                 onClick={() => handleEditClick(solution.id)}
-                                className="w-24 py-2 text-sm font-medium bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors shadow-sm flex justify-center items-center"
+                                className="text-gray-900 hover:text-gray-600 hover:bg-gray-100 rounded-full"
+                                icon={Pencil}
                             >
                                 Éditer
-                            </button>
+                            </SimpleButton>
 
-                            <button
+                            <SimpleButton
                                 onClick={() => handleDeleteClick(solution.id)}
-                                className="px-4 py-2 text-sm font-medium bg-red-500 text-white rounded hover:bg-red-600 transition-colors shadow-sm"
+                                className="text-gray-900 hover:text-red-600 hover:bg-red-50 rounded-full"
+                                icon={Trash2}
                             >
                                 Supprimer
-                            </button>
+                            </SimpleButton>
                         </li>
                     ))}
                 </ul>

@@ -10,20 +10,7 @@ import { jsonToMarkdown } from '../utils/jsonToMarkdown';
 import FicheTypeSelector from '../components/markdown/FicheTypeSelector';
 import { FileText, Eye, Wand2, Trash2, Loader2 } from 'lucide-react';
 
-const SimpleButton = ({ children, onClick, disabled, className, icon: Icon }) => (
-  <button
-    onClick={onClick}
-    disabled={disabled}
-    className={`
-            flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg font-medium text-sm transition-all duration-200
-            disabled:opacity-50 disabled:cursor-not-allowed
-            ${className}
-        `}
-  >
-    {Icon && <Icon size={16} />}
-    {children}
-  </button>
-);
+import SimpleButton from '../components/ui/SimpleButton';
 
 
 const UploadPage = () => {

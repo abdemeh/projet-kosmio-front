@@ -55,8 +55,8 @@ const Header = () => {
                                 key={item.name}
                                 to={item.path}
                                 className={`text-sm transition-colors duration-200 ${location.pathname === item.path
-                                        ? 'text-gray-900 font-bold'
-                                        : 'text-gray-500 font-medium hover:text-gray-900'
+                                    ? 'text-gray-900 font-bold'
+                                    : 'text-gray-500 font-medium hover:text-gray-900'
                                     }`}
                             >
                                 {item.name}

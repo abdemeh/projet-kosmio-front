@@ -18,8 +18,8 @@ function App() {
           <Route path="/edit" element={<EditPage />} />
           <Route path="/error" element={<ErrorPage />} />
           {/* Placeholder routes for nav items */}
-          <Route path="/solution" element={<Solution/>} />
-          <Route path="/secteur" element={<Sector/>} />
+          <Route path="/solution" element={<Solution />} />
+          <Route path="/secteur" element={<Sector />} />
         </Route>
       </Routes>
     </AuthProvider>
