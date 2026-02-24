@@ -6,39 +6,42 @@
 export function markdownToJSON(markdown) {
     if (!markdown) return null;
 
-    const isSector = markdown.includes("**Sous-secteurs :**") || markdown.includes("Description synthétique du secteur");
+    const isSector = markdown.includes("Sous-secteurs") || 
+                     markdown.includes("Description synthétique") ||
+                     markdown.includes("Profil d’émissions");
+
+    const sections = splitByHeaders(markdown);
 
     if (isSector) {
-        return parseSectorMarkdown(markdown);
+        return parseSectorMarkdown(sections, markdown);
     } else {
-        return parseSolutionMarkdown(markdown);
-    }
+        return parseSolutionMarkdown(sections, markdown);
+    }   
 }
 
 /* ============================================================
    PARSER SOLUTION
    ============================================================ */
-function parseSolutionMarkdown(md) {
-    const sections = splitByHeaders(md);
-
-    // Extraction Méta-données (Haut de page)
-    const metaText = sections['intro'] || "";
-    const title = extractTitle(metaText);
+function parseSolutionMarkdown(sections, fullMd) {
+    const intro = sections['intro'] || "";
+    const catSysValue = extractValue(intro, "Catégorie / Système");
+    const catParts = catSysValue.split('/');
 
     return {
         type: "solution",
-        title: title,
+        title: extractTitle(intro),        
         metadata: {
-            category: extractValue(metaText, "Catégorie / Système").split('/')[0]?.trim(),
-            system: extractValue(metaText, "Catégorie / Système").split('/')[1]?.trim(),
-            type: extractValue(metaText, "Type de solution"),
-            maturity: extractValue(metaText, "Niveau de maturité"),
-            cost_scale: extractValue(metaText, "Coût typique"),
-            complexity: extractValue(metaText, "Complexité"),
-            last_update: extractValue(metaText, "Dernière mise à jour"),
-            contributors: extractListLine(metaText, "Contributeurs")
+            category: (catParts[0] || "").trim() || "N/A",
+            system: (catParts[1] || "").trim() || "N/A",
+            type: extractValue(intro, "Type de solution"),
+            maturity: extractValue(intro, "Niveau de maturité"),
+            cost_scale: extractValue(intro, "Coût typique"),
+            complexity: extractValue(intro, "Complexité"),
+            last_update: extractValue(intro, "Dernière mise à jour"),
+            contributors: extractListLine(intro, "Contributeurs")
         },
-        summary: getSectionContent(sections, "Résumé"),
+
+        summary: sections['Résumé'] || extractContentUnderHeader(fullMd, "Résumé"),        
         content: {
             context: {
                 objective: extractValue(sections['1'], "Objectif principal"),
@@ -83,20 +86,19 @@ function parseSolutionMarkdown(md) {
 /* ============================================================
    PARSER SECTEUR
    ============================================================ */
-function parseSectorMarkdown(md) {
-    const sections = splitByHeaders(md);
-    const metaText = sections['intro'] || "";
+function parseSectorMarkdown(sections, fullMd) {
+    const intro = sections['intro'] || "";
 
     return {
         type: "secteur",
-        title: extractTitle(metaText),
+        title: extractTitle(intro),
         metadata: {
-            sub_sectors: extractListLine(metaText, "Sous-secteurs"),
-            company_size: extractValue(metaText, "Taille d’entreprise typique"),
-            last_update: extractValue(metaText, "Dernière mise à jour"),
-            contributors: extractListLine(metaText, "Contributeurs")
+            sub_sectors: extractListLine(intro, "Sous-secteurs"),
+            company_size: extractValue(intro, "Taille d’entreprise typique"),
+            last_update: extractValue(intro, "Dernière mise à jour"),
+            contributors: extractListLine(intro, "Contributeurs")
         },
-        summary: getSectionContent(sections['1']), // Supposant que tout le contenu est le résumé/desc
+        summary: sections['Résumé'] || extractContentUnderHeader(fullMd, "Résumé"),        
         content: {
             description: getSectionContent(sections['1']),
             emissions_profile: {
@@ -130,22 +132,32 @@ function parseSectorMarkdown(md) {
 function splitByHeaders(md) {
     const lines = md.split('\n');
     const sections = { intro: [] };
-    let currentSection = 'intro';
+    let currentKey = 'intro';
 
     lines.forEach(line => {
         // Détecte "## 1. Titre" ou "## 10. Titre" ou "## 🎯"
-        const match = line.match(/^##\s+(?:(\d+)\.|.*?)(.*)/);
-        if (match) {
-            currentSection = match[1] || match[2].trim().substring(0, 5); // Fallback clé
+        const sectionMatch = line.match(/^##\s+.*?\s*(\d+)\.?/);
+        const emojiHeaderMatch = line.match(/^##\s+([^\d\s].*)/);
+        
+        if (sectionMatch) {
+            currentKey = sectionMatch[1];
+            sections[currentKey] = [];
+        } else if (emojiHeaderMatch && currentKey === 'intro') {
+            // Capture les sections nommées comme "Résumé"
+            const name = emojiHeaderMatch[1].replace(/[^\w\s]/gi, '').trim(); 
+            if (name.includes("Résumé")) {
+                currentKey = "Résumé";
+                sections[currentKey] = [];
+            }
         } else {
-            if (!sections[currentSection]) sections[currentSection] = [];
-            sections[currentSection].push(line);
+            if (!sections[currentKey]) sections[currentKey] = [];
+            sections[currentKey].push(line);
         }
     });
 
     // Join lines back to strings
     Object.keys(sections).forEach(key => {
-        sections[key] = sections[key].join('\n');
+        sections[key] = sections[key].join('\n').trim();
     });
     return sections;
 }
@@ -158,32 +170,33 @@ function extractTitle(text) {
 // Extrait "Valeur" de "**Clé :** Valeur"
 function extractValue(text, key) {
     if (!text) return "";
-    // Regex : cherche **Key** ou **Key :** suivi de n'importe quoi jusqu'à la fin de ligne
-    const regex = new RegExp(`\\*\\*${key}.*?\\*\\*[:\\s]*(.*)`, 'i');
+
+    const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`\\*\\*${escapedKey}\\s*[:\\*]*\\s*(.*)`, 'i');
+    
     const match = text.match(regex);
-    return match ? match[1].trim() : "";
+    if (match && match[1]) {
+        return match[1].trim();
+    }
+    return "";
 }
 
 // Extrait une liste séparée par des virgules "A, B, C" -> ["A", "B", "C"]
 function extractListLine(text, key) {
     const val = extractValue(text, key);
-    if (!val || val === "Non spécifié") return [];
-    return val.split(',').map(s => s.trim());
+    if (!val || val.toLowerCase().includes("non spécifié") || val === "N/A") return [];
+    return val.split(',').map(s => s.trim()).filter(s => s !== "");
 }
 
 // Extrait les puces "- Item"
 function extractBulletPoints(text) {
     if (!text) return [];
-    const regex = /^-\s+(.*)$/gm;
-    let match;
-    const results = [];
-    while ((match = regex.exec(text)) !== null) {
-        // Ignore les lignes qui ressemblent à des clés "**Clé :**"
-        if (!match[1].trim().startsWith('**')) {
-            results.push(match[1].trim());
-        }
-    }
-    return results;
+    const lines = text.split('\n');
+    return lines
+        .map(l => l.trim())
+        .filter(l => l.startsWith('- ') || l.startsWith('* '))
+        .map(l => l.substring(2).trim())
+        .filter(l => !l.includes('**:'));
 }
 
 // Extrait les puces situées APRES un sous-titre ou un mot clé spécifique
