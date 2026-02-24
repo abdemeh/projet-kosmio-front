@@ -38,6 +38,7 @@ function generateSolutionMarkdown(data) {
     const content = data.content || {};
     const ctx = content.context || {};
     const impact = content.impacts || {};
+    const mecanism = content.mecanism || {};
 
     return `
 # ${data.title || "Titre de la Solution"}
@@ -70,11 +71,10 @@ ${data.summary || "Pas de résumé disponible."}
 
 ## ⚙️ 2. Fonctionnement
 
-${content.mechanism?.description || ""}
+${mecanism.description || ""}
 
 ### Variantes possibles
-${formatListCheck(content.mechanism?.variants)}
-
+${formatListCheck(mecanism.variants)}
 ---
 
 ## 📌 3. Conditions d’applicabilité
@@ -99,9 +99,9 @@ ${formatListBullet(content.applicability?.constraints, 2)}
 - ${impact.co2 || "Non spécifié"}
 
 ### Coûts (Capex / Opex)
-- **Capex :** ${impact.costs?.capex || "N/A"}
-- **Opex :** ${impact.costs?.opex || "N/A"}
-- **ROI :** ${impact.costs?.roi || "N/A"}
+- **Capex :** ${impact.capex || "N/A"}
+- **Opex :** ${impact.opex || "N/A"}
+- **ROI :** ${impact.roi || "N/A"}
 
 ### Co-bénéfices
 ${formatListBullet(impact.co_benefits)}
@@ -214,10 +214,9 @@ ${formatResources(content.resources)}
 ---
 
 ## 🏷️ 8. Métadonnées
-
-- **Niveau de complétude :** ${data.contribution?.completeness || "Partielle"}  
-- **Validateur métier :** ${data.contribution?.validator || "N/A"}  
-- **Historique :** ${formatListLine(data.contribution?.history)}  
+- **Niveau de validation :** ${data.contribution?.validation || "Brouillon"}
+- **Niveau de complétude :** ${data.contribution?.completeness || "Partielle"}
+- **Historique :** ${formatListLine(data.contribution?.history)}
 - **Proposer une amélioration :** ${data.contribution?.improvement_proposal_link || "#"}
 `.trim();
 }
@@ -255,21 +254,20 @@ function formatSteps(steps) {
 
 // Formate les risques et solutions
 function formatRisks(risks) {
-    if (!Array.isArray(risks)) return "";
+    if (!Array.isArray(risks) || risks.length === 0) return "Aucun risque spécifié.";
+    
     return `**Risques possibles :**\n${risks
-        .map((r) => `- ${r.risk}`)
-        .join("\n")}\n\n**Stratégies de mitigation :**\n${risks
-        .map((r) => `- ${r.mitigation}`)
-        .join("\n")}`;
+        .map((r) => `- ${r}`)
+        .join("\n")}\n\n**Stratégies de mitigation :**\n- Voir avec des spécialistes et bureaux d'études.`;
 }
 
 // Formate les exemples (Solution)
 function formatExamples(examples) {
-    if (!Array.isArray(examples)) return "";
+    if (!Array.isArray(examples) || examples.length === 0) return "Aucun exemple disponible.";
     return examples
         .map(
             (ex, i) =>
-                `- **Cas n°${i + 1} – ${ex.secteur} :** ${ex.resume} ${
+                `- **Cas n°${i + 1} – ${ex.secteur || "Secteur non spécifié"} :** ${ex.resume} ${
                     ex.link ? `([Lien](${ex.link}))` : ""
                 }`
         )
