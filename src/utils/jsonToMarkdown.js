@@ -38,7 +38,6 @@ function generateSolutionMarkdown(data) {
     const content = data.content || {};
     const ctx = content.context || {};
     const impact = content.impacts || {};
-    const mecanism = content.mecanism || {};
 
     return `
 # ${data.title || "Titre de la Solution"}
@@ -61,7 +60,7 @@ ${data.summary || "Pas de résumé disponible."}
 
 ## 🧭 1. Contexte & périmètre
 
-- **Objectif principal :** ${ctx.objective || ""}
+- **Objectif principal :** ${formatListLine(ctx.objective) || ""}
 - **Types de sites concernés :** ${formatListLine(ctx.target_sites)}
 - **Inclut :** ${formatListLine(ctx.scope_includes)}
 - **N’inclut pas :** ${formatListLine(ctx.scope_excludes)}
@@ -71,10 +70,11 @@ ${data.summary || "Pas de résumé disponible."}
 
 ## ⚙️ 2. Fonctionnement
 
-${mecanism.description || ""}
+${content.mecanism?.description || ""}
 
 ### Variantes possibles
-${formatListCheck(mecanism.variants)}
+${formatListCheck(content.mecanism?.variants)}
+
 ---
 
 ## 📌 3. Conditions d’applicabilité
@@ -93,15 +93,16 @@ ${formatListBullet(content.applicability?.constraints, 2)}
 ## 📊 4. Impacts attendus
 
 ### Énergie
-- ${impact.energy || "Non spécifié"}
+- ${formatListBullet(impact.energy?.description )|| "Non spécifié"}
 
 ### CO₂
-- ${impact.co2 || "Non spécifié"}
+- ${formatListBullet(impact.co2?.description) || "Non spécifié"}
 
 ### Coûts (Capex / Opex)
-- **Capex :** ${impact.capex || "N/A"}
-- **Opex :** ${impact.opex || "N/A"}
-- **ROI :** ${impact.roi || "N/A"}
+- **Capex :** 
+${formatListBullet(impact.costs?.capex) || "N/A"}
+- **Opex :** 
+${formatListBullet(impact.costs?.opex) || "N/A"}
 
 ### Co-bénéfices
 ${formatListBullet(impact.co_benefits)}
@@ -128,7 +129,7 @@ ${formatRisks(content.risks)}
 
 ## 📚 8. Exemples & cas d’usage
 
-${formatExamples(content.examples)}
+${formatExamples(content.exemples)}
 
 ---
 
@@ -214,9 +215,10 @@ ${formatResources(content.resources)}
 ---
 
 ## 🏷️ 8. Métadonnées
-- **Niveau de validation :** ${data.contribution?.validation || "Brouillon"}
-- **Niveau de complétude :** ${data.contribution?.completeness || "Partielle"}
-- **Historique :** ${formatListLine(data.contribution?.history)}
+
+- **Niveau de complétude :** ${data.contribution?.completeness || "Partielle"}  
+- **Validateur métier :** ${data.contribution?.validator || "N/A"}  
+- **Historique :** ${formatListLine(data.contribution?.history)}  
 - **Proposer une amélioration :** ${data.contribution?.improvement_proposal_link || "#"}
 `.trim();
 }
@@ -252,22 +254,30 @@ function formatSteps(steps) {
         .join("\n\n");
 }
 
-// Formate les risques et solutions
+// Formate les risques — gère les tableaux de strings ET les tableaux d'objets {risk, mitigation}
 function formatRisks(risks) {
-    if (!Array.isArray(risks) || risks.length === 0) return "Aucun risque spécifié.";
-    
+    if (!Array.isArray(risks) || risks.length === 0) return "";
+
+    // Tableau de strings simples
+    if (typeof risks[0] === "string") {
+        return `**Risques possibles :**\n${risks.map((r) => `- ${r}`).join("\n")}`;
+    }
+
+    // Tableau d'objets {risk, mitigation}
     return `**Risques possibles :**\n${risks
-        .map((r) => `- ${r}`)
-        .join("\n")}\n\n**Stratégies de mitigation :**\n- Voir avec des spécialistes et bureaux d'études.`;
+        .map((r) => `- ${r.risk}`)
+        .join("\n")}\n\n**Stratégies de mitigation :**\n${risks
+        .map((r) => `- ${r.mitigation}`)
+        .join("\n")}`;
 }
 
 // Formate les exemples (Solution)
 function formatExamples(examples) {
-    if (!Array.isArray(examples) || examples.length === 0) return "Aucun exemple disponible.";
+    if (!Array.isArray(examples)) return "";
     return examples
         .map(
             (ex, i) =>
-                `- **Cas n°${i + 1} – ${ex.secteur || "Secteur non spécifié"} :** ${ex.resume} ${
+                `- **Cas n°${i + 1} – ${ex.secteur} :** ${ex.resume} ${
                     ex.link ? `([Lien](${ex.link}))` : ""
                 }`
         )
