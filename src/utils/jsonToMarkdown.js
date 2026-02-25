@@ -151,7 +151,7 @@ ${formatResources(content.resources)}
 function generateSectorMarkdown(data) {
     const meta = data.metadata || {};
     const content = data.content || {};
-    const profile = content.emissions_profile || {};
+    const profile = content["emissions-profile"] || {};
 
     return `
 # ${data.title || "Titre du Secteur"}
@@ -192,7 +192,7 @@ ${formatChallenges(content.challenges)}
 
 ## 🧩 4. Systèmes & solutions clés pour ce secteur
 
-${formatSystemTable(content.systems_matrix)}
+${formatSystemTable(content["systems-matrix"])}
 
 ---
 
@@ -204,7 +204,7 @@ ${formatSectorPath(content.sector_path)}
 
 ## 📚 6. Cas d’usage sectoriels
 
-${formatSectorCases(content.use_cases)}
+${formatSectorCases(content.use_case)}
 
 ---
 
