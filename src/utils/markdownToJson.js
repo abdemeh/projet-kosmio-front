@@ -8,7 +8,7 @@ export function markdownToJSON(markdown) {
 
     const isSector = markdown.includes("Sous-secteurs") || 
                      markdown.includes("Description synthétique") ||
-                     markdown.includes("Profil d’émissions");
+                     markdown.includes("Profil d'émissions");
 
     const sections = splitByHeaders(markdown);
 
@@ -44,13 +44,13 @@ function parseSolutionMarkdown(sections, fullMd) {
         summary: sections['Résumé'] || extractContentUnderHeader(fullMd, "Résumé"),        
         content: {
             context: {
-                objective: extractValue(sections['1'], "Objectif principal"),
+                objective: extractListLine(sections['1'], "Objectif principal"),
                 target_sites: extractListLine(sections['1'], "Types de sites concernés"),
                 scope_includes: extractListLine(sections['1'], "Inclut"),
-                scope_excludes: extractListLine(sections['1'], "N’inclut pas"),
+                scope_excludes: extractListLine(sections['1'], "N'inclut pas"),
                 prerequisites: extractListLine(sections['1'], "Prérequis")
             },
-            mechanism: {
+            mecanism: {
                 description: getCleanTextBeforeSubHeader(sections['2']),
                 variants: extractBulletPoints(sections['2'])
             },
@@ -60,23 +60,24 @@ function parseSolutionMarkdown(sections, fullMd) {
                 constraints: extractBulletPointsAfter(sections['3'], "Contraintes")
             },
             impacts: {
-                energy: extractContentUnderHeader(sections['4'], "Énergie"),
-                co2: extractContentUnderHeader(sections['4'], "CO₂"),
+                energy: { description: extractBulletPointsAfter(sections['4'], "Énergie") },
+                co2: { description: extractBulletPointsAfter(sections['4'], "CO₂") },
                 costs: {
-                    capex: extractValue(sections['4'], "Capex"),
-                    opex: extractValue(sections['4'], "Opex"),
-                    roi: extractValue(sections['4'], "ROI")
+                    capex: extractBulletPointsAfter(sections['4'], "Capex"),
+                    opex: extractBulletPointsAfter(sections['4'], "Opex"),
                 },
                 co_benefits: extractBulletPointsAfter(sections['4'], "Co-bénéfices")
             },
             levers: extractBulletPoints(sections['5']),
             implementation_path: extractNumberedSteps(sections['6']),
             risks: extractRisks(sections['7']),
-            examples: extractExamples(sections['8']),
+            exemples: extractExamples(sections['8']),
             resources: extractResources(sections['9'])
         },
         contribution: {
-            validation_level: extractValue(sections['10'], "Niveau de validation"),
+            validation: extractValue(sections['10'], "Niveau de validation"),
+            completeness: extractValue(sections['10'], "Niveau de complétude"),
+            validator: extractValue(sections['10'], "Validateur métier"),
             history: extractListLine(sections['10'], "Historique"),
             improvement_proposal_link: extractValue(sections['10'], "Proposer une amélioration")
         }
@@ -94,14 +95,14 @@ function parseSectorMarkdown(sections, fullMd) {
         title: extractTitle(intro),
         metadata: {
             sub_sectors: extractListLine(intro, "Sous-secteurs"),
-            company_size: extractValue(intro, "Taille d’entreprise typique"),
+            company_size: extractValue(intro, "Taille d'entreprise typique"),
             last_update: extractValue(intro, "Dernière mise à jour"),
             contributors: extractListLine(intro, "Contributeurs")
         },
         summary: sections['Résumé'] || extractContentUnderHeader(fullMd, "Résumé"),        
         content: {
             description: getSectionContent(sections['1']),
-            emissions_profile: {
+            "emissions-profile": {
                 process: extractValue(sections['2'], "Procédés"),
                 utilities: extractValue(sections['2'], "Utilités"),
                 building: extractValue(sections['2'], "Bâtiment"),
@@ -109,10 +110,10 @@ function parseSectorMarkdown(sections, fullMd) {
                 waste: extractValue(sections['2'], "Déchets")
             },
             challenges: extractChallenges(sections['3']),
-            regulations: extractListLine(sections['3'], "Réglementations clés"),
-            systems_matrix: extractTableData(sections['4']),
-            sector_path: extractNumberedSteps(sections['5'], true), // true = format simple
-            use_cases: extractSectorCases(sections['6']),
+            regulations: extractBulletPointsAfter(sections['3'], "Réglementations clés"),
+            "systems-matrix": extractTableData(sections['4']),
+            sector_path: extractNumberedSteps(sections['5'], true),
+            use_case: extractSectorCases(sections['6']),
             resources: extractResources(sections['7'])
         },
         contribution: {
@@ -128,24 +129,26 @@ function parseSectorMarkdown(sections, fullMd) {
    UTILITAIRES DE PARSING (REGEX & STRING MANIPULATION)
    ============================================================ */
 
-// Découpe le Markdown en un objet { 'intro': '...', '1': '...', '2': '...' } basé sur "## X."
 function splitByHeaders(md) {
     const lines = md.split('\n');
     const sections = { intro: [] };
     let currentKey = 'intro';
 
+    const SECTION_NUMBER_REGEX = /^##\s+(?:[^\w\d]*)?(\d+)\.\s/;
+
     lines.forEach(line => {
-        // Détecte "## 1. Titre" ou "## 10. Titre" ou "## 🎯"
-        const sectionMatch = line.match(/^##\s+.*?\s*(\d+)\.?/);
+        const sectionMatch = line.match(SECTION_NUMBER_REGEX);
         const emojiHeaderMatch = line.match(/^##\s+([^\d\s].*)/);
         
         if (sectionMatch) {
             currentKey = sectionMatch[1];
             sections[currentKey] = [];
         } else if (emojiHeaderMatch && currentKey === 'intro') {
-            // Capture les sections nommées comme "Résumé"
-            const name = emojiHeaderMatch[1].replace(/[^\w\s]/gi, '').trim(); 
-            if (name.includes("Résumé")) {
+            const cleanName = line
+                .replace(/^##\s+/, '')
+                .replace(/\p{Emoji}/gu, '')
+                .trim();
+            if (cleanName.startsWith("Résumé")) {
                 currentKey = "Résumé";
                 sections[currentKey] = [];
             }
@@ -155,30 +158,31 @@ function splitByHeaders(md) {
         }
     });
 
-    // Join lines back to strings
     Object.keys(sections).forEach(key => {
         sections[key] = sections[key].join('\n').trim();
     });
     return sections;
 }
 
+//Extrait le titre H1 en supprimant les accolades JSON parasites.
+
 function extractTitle(text) {
     const match = text.match(/^#\s+(.*)/m);
-    return match ? match[1].trim() : "";
+    if (!match) return "";
+    // ✅ FIX : supprime les accolades et guillemets JSON parasites autour du titre
+    return match[1].trim().replace(/^\{["']?|["']?\}$/g, '');
 }
 
 // Extrait "Valeur" de "**Clé :** Valeur"
 function extractValue(text, key) {
     if (!text) return "";
-
-    const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(`\\*\\*${escapedKey}\\s*[:\\*]*\\s*(.*)`, 'i');
-    
-    const match = text.match(regex);
-    if (match && match[1]) {
-        return match[1].trim();
-    }
-    return "";
+    const NORMALIZE_APOSTROPHES = (s) => s.replace(/[\u2018\u2019\u201A\u201B]/g, "'");
+    const normalizedText = NORMALIZE_APOSTROPHES(text);
+    const normalizedKey  = NORMALIZE_APOSTROPHES(key);
+    const escapedKey = normalizedKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(?<!\\w)\\*\\*${escapedKey}\\s*[:\\*]*\\s*(.*)`, 'im');
+    const match = normalizedText.match(regex);
+    return match?.[1]?.trim() || "";
 }
 
 // Extrait une liste séparée par des virgules "A, B, C" -> ["A", "B", "C"]
@@ -188,25 +192,44 @@ function extractListLine(text, key) {
     return val.split(',').map(s => s.trim()).filter(s => s !== "");
 }
 
-// Extrait les puces "- Item"
+// Extrait les puces "- Item" en filtrant les lignes "**Label :**" seules
 function extractBulletPoints(text) {
     if (!text) return [];
-    const lines = text.split('\n');
-    return lines
+    return text.split('\n')
         .map(l => l.trim())
         .filter(l => l.startsWith('- ') || l.startsWith('* '))
         .map(l => l.substring(2).trim())
-        .filter(l => !l.includes('**:'));
+        // ✅ FIX : filtre les lignes qui ne sont que des labels "**Capex :**" sans contenu
+        .filter(l => !/^\*\*[^*]+\*\*\s*:?\s*$/.test(l));
 }
 
-// Extrait les puces situées APRES un sous-titre ou un mot clé spécifique
+//Extrait les puces situées APRÈS un déclencheur (phrase ou header).
 function extractBulletPointsAfter(text, triggerPhrase) {
     if (!text) return [];
-    const parts = text.split(triggerPhrase);
-    if (parts.length < 2) return [];
-    // On prend la partie après la phrase, et on s'arrête au prochain double saut de ligne ou titre
-    const relevantPart = parts[1].split(/\n\n|###/)[0];
-    return extractBulletPoints(relevantPart);
+    const escaped = triggerPhrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    let regex = new RegExp(`\\*\\*${escaped}[^\\n]*\\n((?:[ \\t]+-[^\\n]*\\n?)+)`);
+    let match = text.match(regex);
+    if (match) {
+        return match[1].split('\n')
+            .map(l => l.trim())
+            .filter(l => l.startsWith('- '))
+            .map(l => l.substring(2).trim());
+    }
+
+    regex = new RegExp(`-\\s*\\*\\*${escaped}[^\\n]*\\n([\\s\\S]*?)(?=\\n-\\s*\\*\\*|\\n###|$)`);
+    match = text.match(regex);
+    if (match) return extractBulletPoints(match[1]);
+
+    regex = new RegExp(`###\\s+${escaped}[^\\n]*\\n([\\s\\S]*?)(?=\\n###|$)`);
+    match = text.match(regex);
+    if (match) return extractBulletPoints(match[1]);
+
+    regex = new RegExp(`^\\*\\*${escaped}[^\\n]*\\n((?:-[^\\n]*\\n?)+)`, 'm');
+    match = text.match(regex);
+    if (match) return extractBulletPoints(match[1]);
+
+    return [];
 }
 
 // Nettoie le texte avant le premier sous-titre ###
@@ -215,9 +238,8 @@ function getCleanTextBeforeSubHeader(text) {
     return text.split('###')[0].trim();
 }
 
-// Récupère le contenu brut d'une section en nettoyant les sauts de ligne excessifs
+// Récupère le contenu brut d'une section
 function getSectionContent(sections, key) {
-    // Si key est un objet (cas splitByHeaders), on prend direct, sinon on cherche
     let content = typeof sections === 'string' ? sections : sections[key];
     return content ? content.trim() : "";
 }
@@ -227,11 +249,10 @@ function extractContentUnderHeader(text, subHeader) {
     const regex = new RegExp(`###\\s*${subHeader}[\\s\\S]*?(?=###|$)`, 'i');
     const match = text.match(regex);
     if (!match) return "";
-    // Enlever le titre du match
     return match[0].replace(new RegExp(`###\\s*${subHeader}`, 'i'), '').trim().replace(/^- /gm, '');
 }
 
-// Parsing spécifique pour les étapes numérotées "1. **Titre** description"
+// Parsing des étapes numérotées "1. **Titre**\n   details"
 function extractNumberedSteps(text, simple = false) {
     if (!text) return [];
     const regex = /(\d+)\.\s+\*\*(.*?)\*\*([\s\S]*?)(?=(?:\d+\.\s+\*\*)|$)/g;
@@ -240,13 +261,11 @@ function extractNumberedSteps(text, simple = false) {
 
     while ((match = regex.exec(text)) !== null) {
         if (simple) {
-            // Cas Secteur : "1. **Phase** - action"
             steps.push({
                 phase: match[2].trim(),
                 action: match[3].replace(/-\s+/, '').trim()
             });
         } else {
-            // Cas Solution : "1. **Step** details"
             steps.push({
                 step: match[2].trim(),
                 details: match[3].trim()
@@ -256,44 +275,52 @@ function extractNumberedSteps(text, simple = false) {
     return steps;
 }
 
-// Parsing des Risques (Format spécifique Titre / Mitigation)
+// Parsing des Risques {risk, mitigation}
 function extractRisks(text) {
     if (!text) return [];
-    const riskSection = extractBulletPointsAfter(text, "Risques possibles");
-    const mitiSection = extractBulletPointsAfter(text, "Stratégies de mitigation");
+    const risks = extractBulletPointsAfter(text, "Risques possibles");
+    const mitigations = extractBulletPointsAfter(text, "Stratégies de mitigation");
 
-    // On essaie de mapper index par index (rudimentaire mais fonctionnel si l'ordre est respecté)
-    return riskSection.map((r, i) => ({
+    const hasMitigations = mitigations.some(m => m.trim() !== "");
+    if (!hasMitigations) {
+        return risks; 
+    }
+
+    return risks.map((r, i) => ({
         risk: r,
-        mitigation: mitiSection[i] || ""
+        mitigation: mitigations[i] || ""
     }));
 }
 
 // Parsing des Exemples
 function extractExamples(text) {
     if (!text) return [];
-    const regex = /- \*\*Cas n°\d+ – (.*?)\s*:\*\*\s*(.*?)(\(\[Lien\]\((.*?)\)\))?$/gm;
+    const regex = /- \*\*Cas n[°º]?\d+\s*[\u2013\u2014-]\s*(.*?)\s*:\*\*\s*(.*?)(?:\(\[Lien\]\((.*?)\)\))?\s*$/gm;
     let match;
     const examples = [];
     while ((match = regex.exec(text)) !== null) {
         examples.push({
             secteur: match[1].trim(),
             resume: match[2].trim(),
-            link: match[4] || ""
+            link: match[3] || ""
         });
     }
     return examples;
 }
 
-// Parsing des Ressources
+//Parsing des Ressources.
+
 function extractResources(text) {
-    // Regex pour [Titre](Lien) (Type)
+    if (!text) return [];
+    // Normalise <http://...> → http://... dans les URLs Markdown
+    const normalized = text.replace(/\(<(https?:\/\/[^>]+)>\)/g, '($1)');
     const regex = /-\s+\[(.*?)\]\((.*?)\)\s*(?:\((.*?)\))?/g;
     let match;
     const resources = [];
-    while ((match = regex.exec(text)) !== null) {
+    while ((match = regex.exec(normalized)) !== null) {
         resources.push({
-            title: match[1],
+            // Normalise aussi le titre si l'URL y apparaît entre <>
+            title: match[1].replace(/<(https?:\/\/[^>]+)>/g, '$1'),
             link: match[2],
             type: match[3] || "Autre"
         });
@@ -312,44 +339,37 @@ function extractChallenges(text) {
     return res;
 }
 
-// Parsing des Cas d'usage (Secteur - format ### Cas n°1)
+// Parsing des Cas d'usage (Secteur)
 function extractSectorCases(text) {
-    if(!text) return [];
-    // Split par "### Cas"
-    const parts = text.split(/### Cas n°\d+ – /);
-    parts.shift(); // Enlever le premier élément vide ou intro
-
-    return parts.map(part => {
-        const subSectorMatch = text.match(/### Cas n°\d+ – (.*)/); // Récupérer le nom dans le split précédent est dur, on simplifie
-        // Approche simplifiée : on suppose que le titre était juste au dessus.
-        // Mieux : Regex global sur le bloc complet
-        return {
-            sub_sector: "Extrait", // Difficile à récupérer parfaitement avec split simple, à affiner si critique
-            actions: extractValue(part, "Actions"),
-            results: extractValue(part, "Résultats"),
-            link: extractValue(part, "Lien")
-        };
-    });
+    if (!text) return [];
+    const regex = /### Cas n°\d+ – (.*)\n([\s\S]*?)(?=### Cas n°|$)/g;
+    let match;
+    const cases = [];
+    while ((match = regex.exec(text)) !== null) {
+        cases.push({
+            sub_sector: match[1].trim(),
+            actions: extractValue(match[2], "Actions"),
+            results: extractValue(match[2], "Résultats"),
+            link: extractValue(match[2], "Lien")
+        });
+    }
+    return cases;
 }
 
 // Parsing du Tableau Markdown (Secteur)
 function extractTableData(text) {
     if (!text) return [];
     const lines = text.split('\n').filter(l => l.trim().startsWith('|'));
-    // Enlever header et séparateur
     if (lines.length < 3) return [];
     const dataLines = lines.slice(2);
 
     return dataLines.map(line => {
-        // Split par | et trim
         const cols = line.split('|').map(c => c.trim()).filter(c => c !== "");
         if (cols.length < 4) return null;
-
         return {
             system: cols[0],
             impact: cols[1],
             priority: cols[2],
-            // On avait mis des <br> pour les solutions, on les remet en array
             solutions: cols[3].split('<br>').map(s => s.replace(/^- /, '').trim())
         };
     }).filter(x => x !== null);

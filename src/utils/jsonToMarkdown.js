@@ -141,7 +141,9 @@ ${formatResources(content.resources)}
 
 ## 🏷️ 10. Métadonnées & contribution
 
-- **Niveau de validation :** ${data.contribution?.validation_level || "Brouillon"}  
+- **Niveau de complétude :** ${data.contribution?.completeness || "Partielle"}  
+- **Niveau de validation :** ${data.contribution?.validation || ""}  
+- **Validateur métier :** ${data.contribution?.validator || "N/A"}  
 - **Historique :** ${formatListLine(data.contribution?.history)}  
 - **Proposer une amélioration :** ${data.contribution?.improvement_proposal_link || "#"}
 `.trim();
