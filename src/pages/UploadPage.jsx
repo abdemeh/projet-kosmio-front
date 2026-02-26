@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { createSearchParams, useNavigate } from 'react-router-dom';
 import UploadArea from '../components/pdf/UploadArea';
@@ -9,6 +9,7 @@ import { useMarkdownApi } from '../hooks/useMarkdownApi';
 import { jsonToMarkdown } from '../utils/jsonToMarkdown';
 import FicheTypeSelector from '../components/markdown/FicheTypeSelector';
 import { FileText, Eye, Wand2, Trash2, Loader2 } from 'lucide-react';
+import { useEffect } from 'react';
 
 const SimpleButton = ({ children, onClick, disabled, className, icon: Icon }) => (
   <button
@@ -80,24 +81,24 @@ const UploadPage = () => {
     <div className="flex flex-col items-center justify-center min-h-[80vh]">
       <div className="w-full max-w-3xl">
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold text-gray-900 tracking-tight mb-2">Nouveau Document</h1>
-          <p className="text-gray-500 text-lg">Importez un PDF pour extraire et structurer les données automatiquement.</p>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 tracking-tight mb-2">Nouveau Document</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-lg">Importez un PDF pour extraire et structurer les données automatiquement.</p>
         </div>
 
         <FicheTypeSelector currentType={type} onTypeChange={handleType} />
 
-        <div className="bg-white p-8 rounded-2xl shadow-soft border border-gray-100">
+        <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-800">
           <UploadArea />
 
           {pdfFile && (
             <div className="mt-8 animate-in fade-in slide-in-from-bottom-2">
-              <div className="flex items-center gap-4 p-4 border border-gray-100 bg-gray-50 rounded-xl mb-6">
-                <div className="w-12 h-12 bg-white rounded-lg border border-gray-100 flex items-center justify-center shadow-sm">
+              <div className="flex items-center gap-4 p-4 border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 rounded-xl mb-6">
+                <div className="w-12 h-12 bg-white dark:bg-gray-700 rounded-lg border border-gray-100 dark:border-gray-600 flex items-center justify-center shadow-sm">
                   <FileText className="text-primary-dark" size={24} />
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-900">{pdfFile.name}</p>
-                  <p className="text-xs text-gray-500">{(pdfFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                  <p className="font-semibold text-gray-900 dark:text-gray-100">{pdfFile.name}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{(pdfFile.size / 1024 / 1024).toFixed(2)} MB</p>
                 </div>
               </div>
 
@@ -105,7 +106,7 @@ const UploadPage = () => {
                 <SimpleButton
                   onClick={handleViewPdf}
                   disabled={apiLoading}
-                  className="text-gray-900 hover:text-gray-600 hover:bg-gray-100 w-full sm:w-auto min-w-[140px] rounded-full"
+                  className="text-gray-900 dark:text-gray-100 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 w-full sm:w-auto min-w-[140px] rounded-full"
                   icon={Eye}
                 >
                   Voir PDF
@@ -123,7 +124,7 @@ const UploadPage = () => {
                 <SimpleButton
                   onClick={() => dispatch(resetPdfState())}
                   disabled={apiLoading}
-                  className="text-gray-900 hover:text-red-600 hover:bg-red-50 w-full sm:w-auto rounded-full"
+                  className="text-gray-900 dark:text-gray-100 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 w-full sm:w-auto rounded-full"
                   icon={Trash2}
                 >
                   Annuler
@@ -134,10 +135,10 @@ const UploadPage = () => {
 
           {apiLoading && (
             <div className="mt-6 flex flex-col items-center justify-center text-center space-y-3">
-              <div className="w-full max-w-xs bg-gray-100 rounded-full h-1.5 overflow-hidden">
+              <div className="w-full max-w-xs bg-gray-100 dark:bg-gray-700 rounded-full h-1.5 overflow-hidden">
                 <div className="h-full bg-primary animate-progress"></div>
               </div>
-              <p className="text-sm text-gray-500 animate-pulse">Analyse du document en cours...</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 animate-pulse">Analyse du document en cours...</p>
             </div>
           )}
         </div>

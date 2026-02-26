@@ -123,7 +123,7 @@ const MarkdownPage = () => {
     };
 
     return (
-        <div className="container mx-auto p-4">
+        <div className="container mx-auto p-4 text-gray-900 dark:text-gray-100">
             {/* Toolbar with history toggle */}
             <MarkdownToolbar
                 isEditing={isEditMod}

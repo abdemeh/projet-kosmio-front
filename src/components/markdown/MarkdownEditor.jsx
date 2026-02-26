@@ -10,12 +10,12 @@ import { history } from '@milkdown/plugin-history';
 
 // Composant interne qui initialise l'éditeur
 const MilkdownEditorInternal = ({ content, onChange }) => {
-  const { get } = useEditor((root) => 
+  const { get } = useEditor((root) =>
     Editor.make()
       .config((ctx) => {
         ctx.set(rootCtx, root);
         ctx.set(defaultValueCtx, content || "");
-        
+
         ctx.get(listenerCtx).markdownUpdated((ctx, markdown, prevMarkdown) => {
           if (onChange && markdown !== prevMarkdown) {
             onChange(markdown);
@@ -30,7 +30,7 @@ const MilkdownEditorInternal = ({ content, onChange }) => {
   );
 
   return (
-    <div className="border border-gray-300 rounded-lg min-h-[calc(100vh-250px)] bg-white p-4">
+    <div className="border border-gray-300 dark:border-gray-700 rounded-lg min-h-[calc(100vh-250px)] bg-white dark:bg-gray-800 p-4 text-gray-900 dark:text-gray-100">
       <Milkdown />
     </div>
   );
@@ -39,7 +39,7 @@ const MilkdownEditorInternal = ({ content, onChange }) => {
 // Wrapper avec le Provider
 const MarkdownEditor = ({ content, onChange }) => {
   return (
-    <div className="w-full prose prose-slate max-w-none">
+    <div className="w-full prose prose-slate dark:prose-invert max-w-none">
       <MilkdownProvider>
         <MilkdownEditorInternal content={content} onChange={onChange} />
       </MilkdownProvider>
