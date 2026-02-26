@@ -1,51 +1,69 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { CheckCircle, XCircle, AlertTriangle, Info, AlertCircle, X } from 'lucide-react';
 
 const VARIANT_CONFIG = {
     success: {
         icon: CheckCircle,
-        iconClass: 'text-green-500',
-        bgClass: 'bg-green-50 dark:bg-green-900/20',
-        borderClass: 'border-green-200 dark:border-green-800',
-        confirmClass: 'bg-green-600 hover:bg-green-700 text-white',
-        label: 'Succès',
+        iconClass: 'text-green-600',
+        circleBg: 'bg-green-50 dark:bg-green-900/30',
+        accentColor: 'bg-green-500',
+        confirmClass: 'bg-green-600 hover:bg-green-500 text-white',
+        title: 'Succès',
     },
     error: {
         icon: XCircle,
         iconClass: 'text-red-500',
-        bgClass: 'bg-red-50 dark:bg-red-900/20',
-        borderClass: 'border-red-200 dark:border-red-800',
-        confirmClass: 'bg-red-600 hover:bg-red-700 text-white',
-        label: 'Erreur',
+        circleBg: 'bg-red-50 dark:bg-red-900/30',
+        accentColor: 'bg-red-500',
+        confirmClass: 'bg-red-600 hover:bg-red-500 text-white',
+        title: 'Erreur',
     },
     warning: {
         icon: AlertTriangle,
-        iconClass: 'text-yellow-500',
-        bgClass: 'bg-yellow-50 dark:bg-yellow-900/20',
-        borderClass: 'border-yellow-200 dark:border-yellow-800',
-        confirmClass: 'bg-[#FFD700] hover:bg-[#FFE44D] text-gray-900',
-        label: 'Attention',
+        iconClass: 'text-yellow-600',
+        circleBg: 'bg-yellow-50 dark:bg-yellow-900/30',
+        accentColor: 'bg-[#FFD700]',
+        confirmClass: 'bg-[#FFD700] hover:bg-[#FFE44D] text-gray-900 font-semibold',
+        title: 'Attention',
     },
     info: {
         icon: Info,
         iconClass: 'text-blue-500',
-        bgClass: 'bg-blue-50 dark:bg-blue-900/20',
-        borderClass: 'border-blue-200 dark:border-blue-800',
-        confirmClass: 'bg-blue-600 hover:bg-blue-700 text-white',
-        label: 'Information',
+        circleBg: 'bg-blue-50 dark:bg-blue-900/30',
+        accentColor: 'bg-blue-500',
+        confirmClass: 'bg-blue-600 hover:bg-blue-500 text-white',
+        title: 'Information',
     },
     confirm: {
         icon: AlertCircle,
-        iconClass: 'text-yellow-500',
-        bgClass: 'bg-yellow-50 dark:bg-yellow-900/20',
-        borderClass: 'border-yellow-200 dark:border-yellow-800',
+        iconClass: 'text-yellow-600',
+        circleBg: 'bg-yellow-50 dark:bg-yellow-900/30',
+        accentColor: 'bg-[#FFD700]',
         confirmClass: 'bg-[#FFD700] hover:bg-[#FFE44D] text-gray-900 font-semibold',
-        label: 'Confirmation',
+        title: 'Confirmation',
     },
 };
 
 const AppModal = ({ type, message, variant = 'info', onClose, onConfirm }) => {
+    const [visible, setVisible] = useState(false);
+
+    // Trigger enter animation after mount
+    useEffect(() => {
+        const t = requestAnimationFrame(() => setVisible(true));
+        return () => cancelAnimationFrame(t);
+    }, []);
+
+    const handleClose = () => {
+        setVisible(false);
+        setTimeout(onClose, 250);
+    };
+
+    const handleConfirm = () => {
+        setVisible(false);
+        setTimeout(onConfirm, 250);
+    };
+
     const config = type === 'confirm'
         ? VARIANT_CONFIG.confirm
         : (VARIANT_CONFIG[variant] || VARIANT_CONFIG.info);
@@ -53,55 +71,56 @@ const AppModal = ({ type, message, variant = 'info', onClose, onConfirm }) => {
     const Icon = config.icon;
 
     return createPortal(
+        /* Backdrop */
         <div
-            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
-            onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+            className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 transition-all duration-250 ${visible ? 'bg-black/50 backdrop-blur-sm' : 'bg-transparent'}`}
+            onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
         >
-            <div className="relative w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden animate-in zoom-in-95 duration-200">
-                {/* Top accent bar */}
-                <div className={`h-1 w-full ${type === 'confirm' || variant === 'warning' ? 'bg-[#FFD700]' : variant === 'success' ? 'bg-green-500' : variant === 'error' ? 'bg-red-500' : 'bg-blue-500'}`} />
-
+            {/* Card — matches ErrorPage style */}
+            <div
+                className={`relative w-full max-w-md bg-white dark:bg-gray-900 p-10 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700 text-center
+                    transition-all duration-250
+                    ${visible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4'}`}
+            >
                 {/* Close button */}
                 <button
-                    onClick={onClose}
-                    className="absolute top-4 right-4 p-1.5 rounded-full text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                    onClick={handleClose}
+                    className="absolute top-4 right-4 p-1.5 rounded-full text-gray-300 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
                 >
                     <X size={16} />
                 </button>
 
-                <div className="p-6">
-                    {/* Icon + title */}
-                    <div className="flex items-start gap-4 mb-5">
-                        <div className={`flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center ${config.bgClass} border ${config.borderClass}`}>
-                            <Icon size={22} className={config.iconClass} />
-                        </div>
-                        <div className="flex-1 pt-0.5">
-                            <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 mb-1">
-                                {config.label}
-                            </h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                                {message}
-                            </p>
-                        </div>
-                    </div>
+                {/* Centered icon circle — same size as ErrorPage (w-16 h-16) */}
+                <div className={`w-16 h-16 ${config.circleBg} rounded-full flex items-center justify-center mx-auto mb-6`}>
+                    <Icon size={32} className={config.iconClass} />
+                </div>
 
-                    {/* Actions */}
-                    <div className="flex justify-end gap-2">
-                        {type === 'confirm' && (
-                            <button
-                                onClick={onClose}
-                                className="px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-all duration-200"
-                            >
-                                Annuler
-                            </button>
-                        )}
+                {/* Title */}
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                    {config.title}
+                </h2>
+
+                {/* Message */}
+                <p className="text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
+                    {message}
+                </p>
+
+                {/* Actions */}
+                <div className={`flex gap-3 ${type === 'confirm' ? 'justify-center' : ''}`}>
+                    {type === 'confirm' && (
                         <button
-                            onClick={type === 'confirm' ? onConfirm : onClose}
-                            className={`px-5 py-2 text-sm rounded-full transition-all duration-200 ${config.confirmClass}`}
+                            onClick={handleClose}
+                            className="flex-1 px-6 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all duration-200"
                         >
-                            {type === 'confirm' ? 'Confirmer' : 'OK'}
+                            Annuler
                         </button>
-                    </div>
+                    )}
+                    <button
+                        onClick={type === 'confirm' ? handleConfirm : handleClose}
+                        className={`flex-1 inline-flex items-center justify-center px-6 py-3 text-sm rounded-xl transition-all duration-200 ${config.confirmClass}`}
+                    >
+                        {type === 'confirm' ? 'Confirmer' : 'OK'}
+                    </button>
                 </div>
             </div>
         </div>,
