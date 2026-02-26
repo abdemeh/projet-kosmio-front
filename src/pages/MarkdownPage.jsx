@@ -11,6 +11,7 @@ import MarkdownEditor from '../components/markdown/MarkdownEditor';
 import MarkdownVisualizer from '../components/markdown/MarkdownVisualizer';
 import MarkdownDiff from '../components/markdown/MarkdownDiff';
 import VersionHistory from '../components/markdown/VersionHistory';
+import { useModal } from '../context/ModalContext';
 
 
 const MarkdownPage = () => {
@@ -29,6 +30,7 @@ const MarkdownPage = () => {
     const [showHistory, setShowHistory] = useState(false);
     const [oldMarkdown, setOldMarkdown] = useState();
     const [mode, setMode] = useState("view");
+    const { showAlert } = useModal();
 
     useEffect(() => {
         if (!canPerformAction(role, "update")) {
@@ -89,10 +91,10 @@ const MarkdownPage = () => {
             await update(id, markdownData);
             const freshData = await getFileById(id);
             setMd(jsonToMarkdown(freshData));
-            alert("Mise à jour réussie !");
+            showAlert('Mise à jour réussie !', 'success');
         } catch (err) {
-            console.error("Erreur lors de la mise à jour :", err);
-            alert(err.message || "Erreur lors de la mise à jour");
+            console.error('Erreur lors de la mise à jour :', err);
+            showAlert(err.message || 'Erreur lors de la mise à jour', 'error');
         } finally {
             setIsSaving(false);
         }

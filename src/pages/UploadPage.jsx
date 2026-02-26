@@ -10,6 +10,7 @@ import { jsonToMarkdown } from '../utils/jsonToMarkdown';
 import FicheTypeSelector from '../components/markdown/FicheTypeSelector';
 import { FileText, Eye, Wand2, Trash2, Loader2 } from 'lucide-react';
 import { useEffect } from 'react';
+import { useModal } from '../context/ModalContext';
 
 const SimpleButton = ({ children, onClick, disabled, className, icon: Icon }) => (
   <button
@@ -33,6 +34,7 @@ const UploadPage = () => {
   let { pdfFile, type } = useSelector(state => state.pdf);
   const { role } = useAuth();
   const { loading: apiLoading, generateInfo } = useMarkdownApi('solution');
+  const { showAlert } = useModal();
 
   useEffect(() => {
     if (!canPerformAction(role, "upload")) {
@@ -60,7 +62,7 @@ const UploadPage = () => {
       navigate('/edit');
     } catch (err) {
       console.error("Erreur lors de la génération IA :", err);
-      alert(err.message || "Erreur lors de la génération IA");
+      showAlert(err.message || 'Erreur lors de la génération IA', 'error');
     } finally {
       dispatch(setLoading(false));
     }
