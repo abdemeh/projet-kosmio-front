@@ -95,7 +95,7 @@ const MarkdownToolbar = ({
                 {canPerformAction(role, "validate") &&
                     <button
                         onClick={onValidate}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-900 bg-primary hover:bg-primary-light rounded-lg shadow-sm transition-all"
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-900 bg-[#FFD700] hover:bg-[#FFE44D] rounded-lg shadow-sm transition-all"
                     >
                         {status === 'Validé' ? <UploadCloud size={14} /> : <CheckCircle size={14} />}
                         {status === 'Validé' ? 'Publier' : 'Valider'}
