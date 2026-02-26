@@ -9,14 +9,13 @@ const DropDownAddImage = ({ onClose }) => {
     const dispatch = useDispatch();
     const isLoading = useSelector(state => state.fiche.isLoading);
     const section = useSelector(state => state.fiche.section);
-    const { showAlert } = useModal();
 
     const onDrop = useCallback(acceptedImages => {
         if (acceptedImages.length === 1) {
             dispatch(setImage(acceptedImages[0]));
         } else {
             dispatch(setImage(null));
-            showAlert('Veuillez sélectionner une seule image.', 'warning');
+            alert("Veuillez sélectionner une seule image.");
         }
     }, [dispatch]);
 

@@ -43,18 +43,16 @@ const MarkdownPage = () => {
     }, [role, navigate]);
 
     useEffect(() => {
+        if (!id) return;
+
         const fetchData = async () => {
-            try {
-                const data = await getFileById(id);
-                setJson(data);
-                setMd(jsonToMarkdown(data));
-            } catch (err) {
-                console.error(err);
-            }
+            const data = await getFileById(id);
+            setJson(data);
+            setMd(jsonToMarkdown(data));
         };
 
-        if (id) fetchData();
-    }, [id]);
+        fetchData();
+    }, [id, getFileById]);
 
     const handleToggleHistory = () => {
         setShowHistory(prev => !prev);
