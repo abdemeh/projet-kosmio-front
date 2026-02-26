@@ -1,6 +1,6 @@
 // Actions métier (valider, publier, modifier)
 import React from 'react';
-import { Save, CheckCircle, UploadCloud, Edit3, Eye, Edit2, Paperclip } from 'lucide-react';
+import { Save, CheckCircle, UploadCloud, Edit3, Eye, Paperclip, Clock } from 'lucide-react';
 import { canPerformAction } from '../../utils/permissions';
 import { useAuth } from '../../hooks/useAuth';
 import DropDownAddImage from './DropDownAddImage';
@@ -13,7 +13,9 @@ const MarkdownToolbar = ({
     onSave,
     onValidate,
     status,
-    isSaving
+    isSaving,
+    showHistory,
+    onToggleHistory,
 }) => {
     const { role } = useAuth();
     return (
@@ -25,8 +27,8 @@ const MarkdownToolbar = ({
                     Statut
                 </span>
                 <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${status === 'Validé' ? 'bg-green-50 text-green-700 border-green-200' :
-                        status === 'Brouillon' ? 'bg-yellow-50 text-yellow-800 border-yellow-200' :
-                            'bg-gray-50 text-gray-600 border-gray-100'
+                    status === 'Brouillon' ? 'bg-yellow-50 text-yellow-800 border-yellow-200' :
+                        'bg-gray-50 text-gray-600 border-gray-100'
                     }`}>
                     {status || 'Nouveau'}
                 </span>
@@ -45,21 +47,21 @@ const MarkdownToolbar = ({
                 <div className="h-4 w-px bg-gray-200 mx-1"></div>
 
                 {/*Toggle image uploader*/}
-                <div className="relative"> 
-                {isEditing && 
-                    <button
-                    onClick={onToggleAddImage}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-white hover:bg-gray-50 hover:text-gray-900 rounded-lg border border-gray-200 transition-all"
-                    >
-                    <Paperclip size={14}/> Image
-                    </button>
-                }
+                <div className="relative">
+                    {isEditing &&
+                        <button
+                            onClick={onToggleAddImage}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-white hover:bg-gray-50 hover:text-gray-900 rounded-lg border border-gray-200 transition-all"
+                        >
+                            <Paperclip size={14} /> Image
+                        </button>
+                    }
 
-                {isAddImage && (
-                    <div className="absolute top-full left-0 mt-2 w-96 z-50">
-                    <DropDownAddImage />
-                    </div>
-                )}
+                    {isAddImage && (
+                        <div className="absolute top-full left-0 mt-2 w-96 z-50">
+                            <DropDownAddImage />
+                        </div>
+                    )}
                 </div>
 
                 {/* Sauvegarder (Brouillon) */}
@@ -83,6 +85,22 @@ const MarkdownToolbar = ({
                         {status === 'Validé' ? 'Publier' : 'Valider'}
                     </button>
                 }
+
+                <div className="h-4 w-px bg-gray-200 mx-1"></div>
+
+                {/* Historique */}
+                {onToggleHistory && (
+                    <button
+                        onClick={onToggleHistory}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${showHistory
+                            ? 'bg-gray-900 text-white border-gray-900'
+                            : 'text-gray-600 bg-white hover:bg-gray-50 hover:text-gray-900 border-gray-200'
+                            }`}
+                    >
+                        <Clock size={14} />
+                        Historique
+                    </button>
+                )}
             </div>
         </div>
     );

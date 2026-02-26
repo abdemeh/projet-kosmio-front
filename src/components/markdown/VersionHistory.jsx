@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { History, RotateCcw, Eye } from 'lucide-react';
+import { History, RotateCcw, Eye, GitCompare } from 'lucide-react';
 import { useMarkdownApi } from '../../hooks/useMarkdownApi';
 import { jsonToMarkdown } from '../../utils/jsonToMarkdown';
 
 const VersionHistory = ({ id, onSelectVersion }) => {
-    const [versions, setVersions] = useState([])
-    const {getHistoryById} = useMarkdownApi();
+    const [versions, setVersions] = useState([]);
+    const { getHistoryById } = useMarkdownApi();
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -15,61 +16,74 @@ const VersionHistory = ({ id, onSelectVersion }) => {
                 console.error(err);
             }
         };
-
         if (id) fetchData();
     }, [id, getHistoryById]);
-    console.log(versions);
 
-    if (versions.length === 0) return (<div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 h-full"><p className="flex items-center gap-2 mb-4 text-blue-600 font-semibold">Pas d'ancienne version !</p></div>);
     return (
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 h-full">
-            <div className="flex items-center gap-2 mb-4 text-blue-600 font-semibold">
-                <History size={20} />
-                <h3>Historique des versions</h3>
+        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-4 h-full">
+            {/* Title */}
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100">
+                <History size={16} className="text-gray-400" />
+                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Historique des versions
+                </h3>
             </div>
-            
-            <div className="space-y-3 overflow-y-auto max-h-[600px]">
-                {versions.map((v, index) => (
-                
-                    <div 
-                        key={v.id || index} 
-                        className="group p-3 border rounded-md hover:bg-slate-50 transition-colors border-slate-200"
-                    >
-                        <div className="flex justify-between items-start mb-2">
-                            <div>
-                                <p className="text-sm font-medium text-slate-900">
-                                    Version du {new Date(v.metadata.last_update).toLocaleDateString('fr-FR')}
-                                </p>
+
+            {versions.length === 0 ? (
+                <p className="text-xs text-gray-400 text-center py-6">Pas d'ancienne version.</p>
+            ) : (
+                <div className="space-y-3 overflow-y-auto max-h-[600px] pr-1">
+                    {versions.map((v, index) => (
+                        <div
+                            key={v.id || index}
+                            className="p-3 border border-gray-100 rounded-xl bg-gray-50/50 hover:bg-gray-50 transition-colors"
+                        >
+                            {/* Version date */}
+                            <p className="text-xs font-semibold text-gray-700 mb-3">
+                                {new Date(v.metadata.last_update).toLocaleDateString('fr-FR', {
+                                    day: '2-digit',
+                                    month: 'short',
+                                    year: 'numeric',
+                                })}
+                            </p>
+
+                            {/* Action buttons — each on its own row, full width */}
+                            <div className="flex flex-col gap-1.5">
+                                {/* Voir — grey ghost */}
+                                <button
+                                    onClick={() => onSelectVersion(jsonToMarkdown(v), 'view')}
+                                    className="flex items-center gap-2 w-full px-3 py-1.5 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-200 transition-all duration-200"
+                                >
+                                    <Eye size={13} className="flex-shrink-0" />
+                                    Voir
+                                </button>
+
+                                {/* Diff — yellow */}
+                                <button
+                                    onClick={() => onSelectVersion(jsonToMarkdown(v), 'diff')}
+                                    className="flex items-center gap-2 w-full px-3 py-1.5 rounded-lg text-xs font-medium text-gray-700 hover:bg-[#FFD700] hover:text-gray-900 transition-all duration-200"
+                                >
+                                    <GitCompare size={13} className="flex-shrink-0" />
+                                    Diff
+                                </button>
+
+                                {/* Restaurer — green ghost */}
+                                <button
+                                    onClick={() => {
+                                        if (window.confirm('Restaurer cette version ?')) {
+                                            onSelectVersion(jsonToMarkdown(v), 'edit');
+                                        }
+                                    }}
+                                    className="flex items-center gap-2 w-full px-3 py-1.5 rounded-lg text-xs font-medium text-gray-700 hover:text-green-700 hover:bg-green-50 transition-all duration-200"
+                                >
+                                    <RotateCcw size={13} className="flex-shrink-0" />
+                                    Restaurer
+                                </button>
                             </div>
                         </div>
-                        
-                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                                onClick={() => onSelectVersion(jsonToMarkdown(v), 'view')}
-                                className="flex items-center gap-1 text-xs bg-white border border-slate-300 px-2 py-1 rounded hover:bg-slate-100"
-                            >
-                                <Eye size={14} /> Voir
-                            </button>
-                            <button
-                                onClick={() => onSelectVersion(jsonToMarkdown(v), 'diff')}
-                                className="flex items-center gap-1 text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2 py-1 rounded hover:bg-blue-100"
-                            >
-                                <History size={14} /> Diff
-                            </button>
-                            <button
-                                onClick={() => {
-                                    if(window.confirm("Restaurer cette version ?")) {
-                                        onSelectVersion(jsonToMarkdown(v), 'edit');
-                                    }
-                                }}
-                                className="flex items-center gap-1 text-xs bg-green-50 text-green-700 border border-green-200 px-2 py-1 rounded hover:bg-green-100"
-                            >
-                                <RotateCcw size={14} /> Restaurer
-                            </button>
-                        </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };
