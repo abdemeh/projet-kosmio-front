@@ -72,13 +72,11 @@ const MarkdownToolbar = ({
                             <Paperclip size={14} /> Image
                         </button>
                     }
-
-                    {isAddImage && (
-                        <div className="absolute top-full left-0 mt-2 w-96 z-50">
-                            <DropDownAddImage />
-                        </div>
-                    )}
                 </div>
+
+                {isAddImage && (
+                    <DropDownAddImage onClose={onToggleAddImage} />
+                )}
 
                 {/* Sauvegarder (Brouillon) */}
                 {canPerformAction(role, 'update') &&
