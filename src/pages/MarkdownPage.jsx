@@ -12,10 +12,11 @@ import MarkdownVisualizer from '../components/markdown/MarkdownVisualizer';
 import MarkdownDiff from '../components/markdown/MarkdownDiff';
 import VersionHistory from '../components/markdown/VersionHistory';
 
+
 const MarkdownPage = () => {
 
-    const {id} = useParams();
-    const {update, getFileById, loading, error } = useMarkdownApi();
+    const { id } = useParams();
+    const { update, getFileById, loading, error } = useMarkdownApi();
     const [json, setJson] = useState(null);
     const [md, setMd] = useState("");
     const { role } = useAuth();
@@ -23,7 +24,7 @@ const MarkdownPage = () => {
     const [status, setStatus] = useState('Brouillon')
 
     const [isEditMod, setIsEditMod] = useState(false);
-    const [isSaving, setIsSaving] = useState(false); 
+    const [isSaving, setIsSaving] = useState(false);
     const [isAddImage, setIsAddImage] = useState(false);
     const [showHistory, setShowHistory] = useState(false);
     const [oldMarkdown, setOldMarkdown] = useState();
@@ -61,11 +62,11 @@ const MarkdownPage = () => {
         setIsAddImage(prev => !prev);
     }
     const handleToggleEdit = () => {
-        
-        if (mode === "view"){
+
+        if (mode === "view") {
             setMode("edit");
             setIsEditMod(prev => !prev);
-        } else if (mode === "edit"){
+        } else if (mode === "edit") {
             setMode("view")
             setIsEditMod(prev => !prev);
         } else {
@@ -89,7 +90,7 @@ const MarkdownPage = () => {
             const freshData = await getFileById(id);
             setMd(jsonToMarkdown(freshData));
             alert("Mise à jour réussie !");
-        }catch (err) {
+        } catch (err) {
             console.error("Erreur lors de la mise à jour :", err);
             alert(err.message || "Erreur lors de la mise à jour");
         } finally {
@@ -101,79 +102,76 @@ const MarkdownPage = () => {
     }
 
     const handleselectMode = (versionContent, targetMode) => {
-    switch (targetMode) {
-        case 'diff':
-            setOldMarkdown(versionContent); // ancienne version
-            setMode('diff');
-            break;
+        switch (targetMode) {
+            case 'diff':
+                setOldMarkdown(versionContent);
+                setMode('diff');
+                break;
 
-        case 'edit': // restaurer
-            setMd(versionContent);
-            setMode('edit');
-            setIsEditMod(true);
-            break;
+            case 'edit':
+                setMd(versionContent);
+                setMode('edit');
+                setIsEditMod(true);
+                break;
 
-        case 'view':
-        default:
-            setOldMarkdown(null);
-            setMode('view');
-            break;
-    }
-};
-
-
-
+            case 'view':
+            default:
+                setOldMarkdown(null);
+                setMode('view');
+                break;
+        }
+    };
 
     return (
         <div className="container mx-auto p-4">
-            <div className="flex gap-6">
-                <div className={`${showHistory ? 'w-3/4' : 'w-full'} transition-all duration-300`}>
-                    <MarkdownToolbar
-                        isEditing={isEditMod}
-                        onToggleEdit={handleToggleEdit}
-                        isAddImage={isAddImage}
-                        onToggleAddImage={handleToggleAddImage}
-                        isSaving={isSaving}
-                        onSave={handleSave}
-                        onValidate={handleValidate}
-                        status={status}
-                    />
-                    <div>
-                        <button
-                            onClick={handleToggleHistory}
-                        >
-                            Show History
-                        </button>
-                    </div>
+            {/* Toolbar with history toggle */}
+            <MarkdownToolbar
+                isEditing={isEditMod}
+                onToggleEdit={handleToggleEdit}
+                isAddImage={isAddImage}
+                onToggleAddImage={handleToggleAddImage}
+                isSaving={isSaving}
+                onSave={handleSave}
+                onValidate={handleValidate}
+                status={status}
+                showHistory={showHistory}
+                onToggleHistory={handleToggleHistory}
+            />
 
-                    <div></div>
+            {/* Main two-column layout */}
+            <div className="flex gap-6 items-start">
 
-                    <div className="mt-4"></div>
+                {/* Editor / viewer column */}
+                <div className={`${showHistory ? 'w-3/4' : 'w-full'} transition-all duration-300 min-w-0`}>
+                    <div className="mt-4">
                         {mode === 'edit' && (
                             <MarkdownEditor content={md} onChange={setMd} />
                         )}
-                        
+
                         {mode === 'view' && (
                             <MarkdownVisualizer content={md} />
                         )}
 
                         {mode === 'diff' && (
-                            <MarkdownDiff 
-                                oldCode={oldMarkdown} 
-                                newCode={md} 
+                            <MarkdownDiff
+                                oldCode={oldMarkdown}
+                                newCode={md}
                             />
                         )}
                     </div>
                 </div>
 
-                    {showHistory && (
-                        <div className="w-1/4 animate-in slide-in-from-right duration-300">
-                            <VersionHistory 
-                                onSelectVersion={handleselectMode}
-                                id={id}
-                            />
-                        </div>
-                    )}
+                {/* History side panel — stays inside the flex row */}
+                <div
+                    className={`flex-shrink-0 transition-all duration-300 overflow-hidden mt-4 ${showHistory ? 'w-1/4 opacity-100' : 'w-0 opacity-0'
+                        }`}
+                >
+                    <VersionHistory
+                        onSelectVersion={handleselectMode}
+                        id={id}
+                    />
+                </div>
+            </div>
         </div>
     );
 }
