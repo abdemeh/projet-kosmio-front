@@ -69,7 +69,7 @@ const MarkdownToolbar = ({
                     <button
                         onClick={onSave}
                         disabled={isSaving}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-lg shadow-sm disabled:opacity-50 transition-all"
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-white hover:bg-gray-900 hover:text-white rounded-lg border border-gray-200 shadow-sm disabled:opacity-50 transition-all"
                     >
                         <Save size={14} />
                         {isSaving ? 'Enregistrement...' : 'Sauvegarder'}
