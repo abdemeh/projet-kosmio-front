@@ -1,22 +1,22 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useAuth } from '../hooks/useAuth';
-import { createSearchParams, useNavigate, useParams } from 'react-router-dom'; 
+import { createSearchParams, useNavigate, useParams } from 'react-router-dom';
 import { canPerformAction } from '../utils/permissions';
 import MarkdownToolbar from '../components/markdown/MarkdownToolbar';
 import MarkdownEditor from '../components/markdown/MarkdownEditor';
 import MarkdownVisualizer from '../components/markdown/MarkdownVisualizer';
 import { ArrowLeft, FileText } from 'lucide-react';
-import { markdownToJSON} from "../utils/markdownToJson";
+import { markdownToJSON } from "../utils/markdownToJson";
 import { useMarkdownApi } from '../hooks/useMarkdownApi';
 import { setMarkdown } from '../store/pdfSlice';
 
 const EditPage = () => {
-    const { id: paramId } = useParams(); 
-    
+    const { id: paramId } = useParams();
+
     const { pdfFile, markdown, id: storeId } = useSelector(state => state.pdf);
-    
-   
+
+
     const currentId = paramId || storeId;
 
     const { role } = useAuth();
@@ -24,11 +24,11 @@ const EditPage = () => {
     const [isEditMod, setIsEditMode] = useState(false);
     const [status, setStatus] = useState('Brouillon');
     const [isSaving, setIsSaving] = useState(false);
-    
-    
+
+
     const [content, setContent] = useState(markdown || "");
-    
-    const {update, loading, error} = useMarkdownApi();
+
+    const { update, loading, error } = useMarkdownApi();
     const [isAddImage, setIsAddImage] = useState(false);
     const dispatch = useDispatch();
 
@@ -44,7 +44,7 @@ const EditPage = () => {
 
     const handleToggleAddImage = () => setIsAddImage(prev => !prev)
     const handleToggleEdit = () => setIsEditMode(prev => !prev);
-    
+
     const handleSave = async () => {
         console.log(currentId);
         if (!content || !currentId) {
@@ -78,15 +78,15 @@ const EditPage = () => {
         return null;
     }, [pdfFile]);
 
-    
+
     if (!pdfFile && !content && !paramId) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-                <div className="bg-gray-50 p-8 rounded-full mb-6">
-                    <FileText size={48} className="text-gray-300" />
+                <div className="bg-gray-50 dark:bg-gray-800 p-8 rounded-full mb-6">
+                    <FileText size={48} className="text-gray-300 dark:text-gray-600" />
                 </div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">Aucun document chargé</h2>
-                <p className="text-gray-500 mb-8 max-w-sm">Veuillez sélectionner un fichier PDF ou une solution existante.</p>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">Aucun document chargé</h2>
+                <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-sm">Veuillez sélectionner un fichier PDF ou une solution existante.</p>
                 <button
                     onClick={() => navigate('/upload')}
                     className="px-6 py-3 bg-primary text-gray-900 font-medium rounded-lg hover:bg-primary-light transition-colors shadow-sm hover:shadow-md"
@@ -103,14 +103,14 @@ const EditPage = () => {
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => navigate('/')}
-                        className="p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors"
+                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full text-gray-500 dark:text-gray-400 transition-colors"
                     >
                         <ArrowLeft size={20} />
                     </button>
                     <div>
-                        <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                             {pdfFile?.name || "Édition Solution"}
-                            <span className="px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 text-xs font-normal border border-yellow-200">
+                            <span className="px-2 py-0.5 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 text-xs font-normal border border-yellow-200 dark:border-yellow-800">
                                 {status}
                             </span>
                         </h2>
@@ -118,13 +118,13 @@ const EditPage = () => {
                 </div>
             </div>
 
-            <div className="flex flex-1 gap-6 min-h-0">
+            <div className="flex flex-1 gap-6 min-h-0 ">
                 {/* Colonne PDF ou Placeholder si pas de PDF */}
-                <div className="flex-1 flex flex-col min-w-0 bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden">
-                    <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
-                        <h3 className="font-semibold text-gray-700 text-sm">Document Original</h3>
+                <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-gray-900 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700 overflow-hidden">
+                    <div className="p-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex justify-between items-center">
+                        <h3 className="font-semibold text-gray-700 dark:text-gray-300 text-sm">Document Original</h3>
                     </div>
-                    <div className="flex-1 bg-gray-100 overflow-hidden relative flex items-center justify-center">
+                    <div className="flex-1 bg-gray-100 dark:bg-gray-800 overflow-hidden relative flex items-center justify-center">
                         {pdfUrl ? (
                             <iframe
                                 src={pdfUrl}
@@ -136,16 +136,16 @@ const EditPage = () => {
                                 Votre navigateur ne supporte pas l'affichage des PDF.
                             </iframe>
                         ) : (
-                            <p className="text-gray-400 text-sm p-4 text-center">
-                                Document PDF non disponible <br/> (Mode édition texte seul)
+                            <p className="text-gray-400 dark:text-gray-500 text-sm p-4 text-center">
+                                Document PDF non disponible <br /> (Mode édition texte seul)
                             </p>
                         )}
                     </div>
                 </div>
 
                 {/* Colonne Markdown */}
-                <div className="flex-1 flex flex-col min-w-0 bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden">
-                    <div className="p-2 border-b border-gray-100 bg-white z-10">
+                <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-gray-900 rounded-2xl shadow-soft border border-gray-100 dark:border-gray-700 overflow-hidden">
+                    <div className="p-2 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-900 z-10">
                         <MarkdownToolbar
                             isEditing={isEditMod}
                             isAddImage={isAddImage}
@@ -158,9 +158,9 @@ const EditPage = () => {
                         />
                     </div>
 
-                    <div className="flex-1 overflow-auto bg-white">
+                    <div className="flex-1 overflow-auto bg-white dark:bg-gray-900">
                         {!isEditMod ? (
-                            <div className="p-6 prose prose-sm max-w-none">
+                            <div className="p-6 prose prose-sm dark:prose-invert max-w-none">
                                 <MarkdownVisualizer content={content}></MarkdownVisualizer>
                             </div>
                         ) : (
