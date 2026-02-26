@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { useMarkdownApi } from "../hooks/useMarkdownApi";
 import { useNavigate } from "react-router-dom";
 import { Pencil, Trash2 } from "lucide-react";
+import { useModal } from '../context/ModalContext';
 
 const Sector = () => {
     const { error, loading, getAllSector } = useMarkdownApi();
     const [sectors, setSectors] = useState([]);
 
     const navigate = useNavigate();
+    const { showConfirm } = useModal();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -27,9 +29,9 @@ const Sector = () => {
     };
 
     const handleDeleteClick = (id) => {
-        if (window.confirm("Voulez-vous vraiment supprimer ce secteur ?")) {
-            console.log("Suppression de l'ID :", id);
-        }
+        showConfirm('Voulez-vous vraiment supprimer ce secteur ?', () => {
+            console.log('Suppression de l\'ID :', id);
+        });
     };
 
     if (loading) return <p className="text-gray-500 dark:text-gray-400">Chargement des secteurs...</p>;

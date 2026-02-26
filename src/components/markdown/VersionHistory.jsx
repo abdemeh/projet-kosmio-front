@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { History, RotateCcw, Eye, GitCompare } from 'lucide-react';
 import { useMarkdownApi } from '../../hooks/useMarkdownApi';
 import { jsonToMarkdown } from '../../utils/jsonToMarkdown';
+import { useModal } from '../../context/ModalContext';
 
 const VersionHistory = ({ id, onSelectVersion }) => {
     const [versions, setVersions] = useState([]);
     const { getHistoryById } = useMarkdownApi();
+    const { showConfirm } = useModal();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -70,9 +72,9 @@ const VersionHistory = ({ id, onSelectVersion }) => {
                                 {/* Restaurer — green ghost */}
                                 <button
                                     onClick={() => {
-                                        if (window.confirm('Restaurer cette version ?')) {
+                                        showConfirm('Restaurer cette version ?', () => {
                                             onSelectVersion(jsonToMarkdown(v), 'edit');
-                                        }
+                                        });
                                     }}
                                     className="flex items-center gap-2 w-full px-3 py-1.5 rounded-lg text-xs font-medium text-gray-700 dark:text-gray-300 hover:text-green-700 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-200"
                                 >

@@ -3,17 +3,19 @@ import { useDropzone } from 'react-dropzone';
 import { useDispatch, useSelector } from 'react-redux';
 import { setPdfFile } from '../../store/pdfSlice';
 import { UploadCloud } from 'lucide-react';
+import { useModal } from '../../context/ModalContext';
 
 const UploadArea = () => {
   const dispatch = useDispatch();
   const isLoading = useSelector(state => state.pdf.isLoading);
+  const { showAlert } = useModal();
 
   const onDrop = useCallback(acceptedFiles => {
     if (acceptedFiles.length === 1 && acceptedFiles[0].type === 'application/pdf') {
       dispatch(setPdfFile(acceptedFiles[0]));
     } else {
       dispatch(setPdfFile(null));
-      alert("Veuillez sélectionner un seul fichier PDF.");
+      showAlert('Veuillez sélectionner un seul fichier PDF.', 'warning');
     }
   }, [dispatch]);
 

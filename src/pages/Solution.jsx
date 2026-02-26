@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useMarkdownApi } from "../hooks/useMarkdownApi";
 import { useNavigate } from "react-router-dom";
 import { Pencil, Trash2 } from "lucide-react";
+import { useModal } from '../context/ModalContext';
 
 const Solution = () => {
 
@@ -10,6 +11,7 @@ const Solution = () => {
     const [solutions, setSolutions] = useState([]);
 
     const navigate = useNavigate();
+    const { showConfirm } = useModal();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -32,9 +34,9 @@ const Solution = () => {
     };
 
     const handleDeleteClick = (id) => {
-        if (window.confirm("Voulez-vous vraiment supprimer cette solution ?")) {
-            console.log("Suppression de l'ID :", id);
-        }
+        showConfirm('Voulez-vous vraiment supprimer cette solution ?', () => {
+            console.log('Suppression de l\'ID :', id);
+        });
     };
 
     if (loading) return <div className="text-center py-10"><p className="text-gray-500 dark:text-gray-400">Chargement des solutions...</p></div>;

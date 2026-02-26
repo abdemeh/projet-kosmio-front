@@ -10,6 +10,7 @@ import { ArrowLeft, FileText } from 'lucide-react';
 import { markdownToJSON } from "../utils/markdownToJson";
 import { useMarkdownApi } from '../hooks/useMarkdownApi';
 import { setMarkdown } from '../store/pdfSlice';
+import { useModal } from '../context/ModalContext';
 
 const EditPage = () => {
     const { id: paramId } = useParams();
@@ -31,6 +32,7 @@ const EditPage = () => {
     const { update, loading, error } = useMarkdownApi();
     const [isAddImage, setIsAddImage] = useState(false);
     const dispatch = useDispatch();
+    const { showAlert } = useModal();
 
     useEffect(() => {
         if (!canPerformAction(role, "update")) {
@@ -58,10 +60,10 @@ const EditPage = () => {
             const result = await update(currentId, markdownData);
             console.log("Update réussi :", result);
             dispatch(setMarkdown(content))
-            alert("Mise à jour réussie !");
+            showAlert('Mise à jour réussie !', 'success');
         } catch (err) {
-            console.error("Erreur lors de la mise à jour :", err);
-            alert(err.message || "Erreur lors de la mise à jour");
+            console.error('Erreur lors de la mise à jour :', err);
+            showAlert(err.message || 'Erreur lors de la mise à jour', 'error');
         } finally {
             setIsSaving(false);
         }
