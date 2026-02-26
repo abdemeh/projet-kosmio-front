@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useSelector } from "react-redux";
 import {env} from "../config/env";
 
@@ -12,21 +12,21 @@ Hook générique API markdown (solutions/secteurs)
 */
 
 export const useMarkdownApi = () => {
-    let {type} = useSelector(state => state.pdf);
+    let type = useSelector(state => state.pdf.type)
     const url = env.apiUrl;
     const baseUrl = `${url}/v1/process/${type}`;
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const handleResponse = async (response) => {
+    const handleResponse = useCallback(async (response) => {
         const data = await response.json();
         console.log(data);
         if (!response.ok) {
             throw new Error(data.message || "Erreur API");
         }
         return data;
-    };
+    }, []);
 
     const generateInfo = async (pdfFile) =>  {
         try {
@@ -154,25 +154,11 @@ export const useMarkdownApi = () => {
         }
     }
 
-    const getHistoryById = async (id) => {
-        try{
+    const getHistoryById = useCallback(async (id) => {
+        try {
             setLoading(true);
             setError(null);
             const response = await fetch(`${url}/v1/get/${id}/history`);
-            return handleResponse(response);
-        }catch (err) {
-            setError(err);
-            throw err
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    const getFileById = async (id) => {
-        try{
-            setLoading(true);
-            setError(null);
-            const response = await fetch(`${url}/v1/get/${id}`)
             return handleResponse(response);
         } catch (err) {
             setError(err);
@@ -180,7 +166,21 @@ export const useMarkdownApi = () => {
         } finally {
             setLoading(false);
         }
-    }
+    }, [url, handleResponse]);
+
+    const getFileById = useCallback(async (id) => {
+        try {
+            setLoading(true);
+            setError(null);
+            const response = await fetch(`${url}/v1/get/${id}`);
+            return handleResponse(response);
+        } catch (err) {
+            setError(err);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }, [url, handleResponse]);
 
     return {loading, error, getFileById, getHistoryById, getAllSector, getAllSolution, generateInfo, update, validate, publish, deleteAction};
 };
